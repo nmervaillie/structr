@@ -29,17 +29,18 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.lang3.StringUtils;
-import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.DynamicRelationshipType;
-import org.neo4j.graphdb.Relationship;
+import org.structr.api.DatabaseService;
+import org.structr.api.Predicate;
+import org.structr.api.graph.Direction;
+import org.structr.api.graph.Relationship;
+import org.structr.api.graph.RelationshipType;
+import org.structr.common.Filter;
 import org.structr.common.Permission;
 import org.structr.common.SecurityContext;
 import org.structr.common.error.ErrorBuffer;
 import org.structr.common.error.FrameworkException;
 import org.structr.core.GraphObject;
-import static org.structr.core.GraphObject.id;
 import org.structr.core.GraphObjectMap;
-import org.structr.core.Predicate;
 import org.structr.core.app.App;
 import org.structr.core.app.StructrApp;
 import org.structr.core.entity.AbstractNode;
@@ -59,24 +60,7 @@ import org.structr.core.property.PropertyMap;
 import org.structr.core.property.StartNode;
 import org.structr.core.property.StringProperty;
 import org.structr.core.script.Scripting;
-import org.structr.function.AddHeaderFunction;
-import org.structr.function.CreateJarFileFunction;
-import org.structr.function.FromCsvFunction;
-import org.structr.function.FromJsonFunction;
-import org.structr.function.GetFunction;
-import org.structr.function.GetRequestHeaderFunction;
-import org.structr.function.HeadFunction;
-import org.structr.function.IncludeFunction;
-import org.structr.function.IsLocaleFunction;
-import org.structr.function.JarEntryFunction;
-import org.structr.function.LogEventFunction;
-import org.structr.function.ParseFunction;
-import org.structr.function.PostFunction;
-import org.structr.function.RenderFunction;
-import org.structr.function.SetDetailsObjectFunction;
-import org.structr.function.SetResponseHeaderFunction;
-import org.structr.function.StripHtmlFunction;
-import org.structr.function.ToJsonFunction;
+import org.structr.function.*;
 import org.structr.web.common.GraphDataSource;
 import org.structr.web.common.RenderContext;
 import org.structr.web.common.RenderContext.EditMode;
@@ -88,8 +72,6 @@ import org.structr.web.datasource.RestDataSource;
 import org.structr.web.datasource.XPathGraphDataSource;
 import org.structr.web.entity.LinkSource;
 import org.structr.web.entity.Renderable;
-import static org.structr.web.entity.dom.DOMNode.dataKey;
-import static org.structr.web.entity.dom.DOMNode.ownerDocument;
 import org.structr.web.entity.dom.relationship.DOMChildren;
 import org.structr.web.entity.dom.relationship.DOMSiblings;
 import org.structr.web.entity.relation.PageLink;
@@ -185,6 +167,7 @@ public abstract class DOMNode extends LinkedTreeNode<DOMChildren, DOMSiblings, D
 		Functions.functions.put("to_json", new ToJsonFunction());
 		Functions.functions.put("from_json", new FromJsonFunction());
 		Functions.functions.put("from_csv", new FromCsvFunction());
+		Functions.functions.put("from_xml", new FromXmlFunction());
 		Functions.functions.put("add_header", new AddHeaderFunction());
 		Functions.functions.put("set_response_header", new SetResponseHeaderFunction());
 		Functions.functions.put("get_request_header", new GetRequestHeaderFunction());
@@ -538,12 +521,14 @@ public abstract class DOMNode extends LinkedTreeNode<DOMChildren, DOMSiblings, D
 	}
 
 	protected void migrateSyncRels() {
+
 		try {
 
-			org.neo4j.graphdb.Node n = getNode();
+			final DatabaseService db     = StructrApp.getInstance().getDatabaseService();
+			org.structr.api.graph.Node n = getNode();
 
-			Iterable<Relationship> incomingSyncRels = n.getRelationships(DynamicRelationshipType.withName("SYNC"), Direction.INCOMING);
-			Iterable<Relationship> outgoingSyncRels = n.getRelationships(DynamicRelationshipType.withName("SYNC"), Direction.OUTGOING);
+			Iterable<Relationship> incomingSyncRels = n.getRelationships(Direction.INCOMING, db.forName(RelationshipType.class, "SYNC"));
+			Iterable<Relationship> outgoingSyncRels = n.getRelationships(Direction.OUTGOING, db.forName(RelationshipType.class, "SYNC"));
 
 			if (getOwnerDocument() instanceof ShadowDocument) {
 
@@ -749,13 +734,17 @@ public abstract class DOMNode extends LinkedTreeNode<DOMChildren, DOMSiblings, D
 		throw new DOMException(DOMException.INVALID_ACCESS_ERR, INVALID_ACCESS_ERR_MESSAGE);
 	}
 
-	protected String indent(final int depth) {
+	protected String indent(final int depth, final RenderContext renderContext) {
+
+		if (!renderContext.shouldIndentHtml()) {
+			return "";
+		}
 
 		StringBuilder indent = new StringBuilder("\n");
 
 		for (int d = 0; d < depth; d++) {
 
-			indent.append("  ");
+			indent.append("	");
 
 		}
 
@@ -858,7 +847,12 @@ public abstract class DOMNode extends LinkedTreeNode<DOMChildren, DOMSiblings, D
 
 	protected void collectNodesByPredicate(Node startNode, DOMNodeList results, Predicate<Node> predicate, int depth, boolean stopOnFirstHit) {
 
-		if (predicate.evaluate(securityContext, startNode)) {
+
+		if (predicate instanceof Filter) {
+			((Filter)predicate).setSecurityContext(securityContext);
+		}
+
+		if (predicate.accept(startNode)) {
 
 			results.add(startNode);
 
@@ -1503,13 +1497,13 @@ public abstract class DOMNode extends LinkedTreeNode<DOMChildren, DOMSiblings, D
 	// ----- nested classes -----
 	protected static class TextCollector implements Predicate<Node> {
 
-		private StringBuilder textBuffer = new StringBuilder(200);
+		private final StringBuilder textBuffer = new StringBuilder(200);
 
 		@Override
-		public boolean evaluate(SecurityContext securityContext, Node... obj) {
+		public boolean accept(final Node obj) {
 
-			if (obj[0] instanceof Text) {
-				textBuffer.append(((Text)obj[0]).getTextContent());
+			if (obj instanceof Text) {
+				textBuffer.append(((Text)obj).getTextContent());
 			}
 
 			return false;
@@ -1529,11 +1523,11 @@ public abstract class DOMNode extends LinkedTreeNode<DOMChildren, DOMSiblings, D
 		}
 
 		@Override
-		public boolean evaluate(SecurityContext securityContext, Node... obj) {
+		public boolean accept(Node obj) {
 
-			if (obj[0] instanceof DOMElement) {
+			if (obj instanceof DOMElement) {
 
-				DOMElement elem = (DOMElement)obj[0];
+				DOMElement elem = (DOMElement)obj;
 
 				if (tagName.equals(elem.getProperty(DOMElement.tag))) {
 					return true;

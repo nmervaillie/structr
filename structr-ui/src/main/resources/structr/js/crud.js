@@ -1,20 +1,20 @@
 /*
- *  Copyright (C) 2010-2015 Structr GmbH
+ *  Copyright (C) 2010-2016 Structr GmbH
  *
  *  This file is part of Structr <http://structr.org>.
  *
- *  structr is free software: you can redistribute it and/or modify
+ *  Structr is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
  *  published by the Free Software Foundation, either version 3 of the
  *  License, or (at your option) any later version.
  *
- *  structr is distributed in the hope that it will be useful,
+ *  Structr is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU Affero General Public License
- *  along with structr.  If not, see <http://www.gnu.org/licenses/>.
+ *  along with Structr.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 var defaultType, defaultView, defaultSort, defaultOrder, defaultPage, defaultPageSize;
@@ -249,45 +249,42 @@ var _Crud = {
 
 		$('#main-help a').attr('href', 'http://docs.structr.org/frontend-user-guide#Data');
 
-		Structr.restoreLocalStorage(function() {
+		if (!_Crud.type) {
+			_Crud.restoreType();
+			//console.log(_Crud.type);
+		}
 
-			if (!_Crud.type) {
-				_Crud.restoreType();
-				//console.log(_Crud.type);
-			}
+		if (!_Crud.type) {
+			_Crud.type = urlParam('type');
+			//console.log(_Crud.type);
+		}
 
-			if (!_Crud.type) {
-				_Crud.type = urlParam('type');
-				//console.log(_Crud.type);
-			}
+		if (!_Crud.type) {
+			_Crud.type = defaultType;
+			//console.log(_Crud.type);
+		}
 
-			if (!_Crud.type) {
-				_Crud.type = defaultType;
-				//console.log(_Crud.type);
-			}
-			
-			// check for single edit mode
-			var id = urlParam('id');
-			if (id) {
-				//console.log('edit mode, editing ', id);
-				_Crud.loadSchema(function() {
-					_Crud.crudRead(null, id, function(node) {
-						//console.log(node, _Crud.view[node.type]);
-						_Crud.showDetails(node, node.type);
-					});
+		// check for single edit mode
+		var id = urlParam('id');
+		if (id) {
+			//console.log('edit mode, editing ', id);
+			_Crud.loadSchema(function() {
+				_Crud.crudRead(null, id, function(node) {
+					//console.log(node, _Crud.view[node.type]);
+					_Crud.showDetails(node, node.type);
 				});
-
-			} else {
-				_Crud.init();
-			}
-
-			$(window).off('resize');
-			$(window).on('resize', function() {
-				_Crud.resize();
 			});
-			hiddenTabs = JSON.parse(LSWrapper.getItem(crudHiddenTabsKey)) || hiddenTabs;
-			log('########## Hidden tabs ##############', hiddenTabs);
+
+		} else {
+			_Crud.init();
+		}
+
+		$(window).off('resize');
+		$(window).on('resize', function() {
+			_Crud.resize();
 		});
+		hiddenTabs = JSON.parse(LSWrapper.getItem(crudHiddenTabsKey)) || hiddenTabs;
+		log('########## Hidden tabs ##############', hiddenTabs);
 
 	},
 	initTabs: function() {

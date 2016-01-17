@@ -1,20 +1,20 @@
 /*
- *  Copyright (C) 2010-2015 Structr GmbH
+ *  Copyright (C) 2010-2016 Structr GmbH
  *
  *  This file is part of Structr <http://structr.org>.
  *
- *  structr is free software: you can redistribute it and/or modify
+ *  Structr is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
  *  published by the Free Software Foundation, either version 3 of the
  *  License, or (at your option) any later version.
  *
- *  structr is distributed in the hope that it will be useful,
+ *  Structr is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU Affero General Public License
- *  along with structr.  If not, see <http://www.gnu.org/licenses/>.
+ *  along with Structr.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 var header, main, footer;
@@ -403,25 +403,30 @@ var Structr = {
 		return false;
 	},
 	loadInitialModule: function(isLogin) {
-		var browserUrl = window.location.href;
-		var anchor = getAnchorFromUrl(browserUrl);
-		lastMenuEntry = ((!isLogin && anchor && anchor !== 'logout') ? anchor : LSWrapper.getItem(lastMenuEntryKey));
-		if (!lastMenuEntry) {
-			lastMenuEntry = LSWrapper.getItem(lastMenuEntryKey) || 'dashboard';
-		} else {
-			log('Last menu entry found: ' + lastMenuEntry);
-		}
-		log('lastMenuEntry', lastMenuEntry);
-		Structr.activateMenuEntry(lastMenuEntry);
-		log(Structr.modules);
-		var module = Structr.modules[lastMenuEntry];
-		if (module) {
-			//module.init();
-			module.onload();
-			if (module.resize)
-				module.resize();
-		}
-		Structr.updateVersionInfo();
+		
+		Structr.restoreLocalStorage(function() {
+			
+			var browserUrl = window.location.href;
+			var anchor = getAnchorFromUrl(browserUrl);
+			lastMenuEntry = ((!isLogin && anchor && anchor !== 'logout') ? anchor : LSWrapper.getItem(lastMenuEntryKey));
+			if (!lastMenuEntry) {
+				lastMenuEntry = LSWrapper.getItem(lastMenuEntryKey) || 'dashboard';
+			} else {
+				log('Last menu entry found: ' + lastMenuEntry);
+			}
+			log('lastMenuEntry', lastMenuEntry);
+			Structr.activateMenuEntry(lastMenuEntry);
+			log(Structr.modules);
+			var module = Structr.modules[lastMenuEntry];
+			if (module) {
+				//module.init();
+				module.onload();
+				if (module.resize)
+					module.resize();
+			}
+			Structr.updateVersionInfo();
+		});
+		
 	},
 	clearMain: function() {
 		var newDroppables = new Array();
