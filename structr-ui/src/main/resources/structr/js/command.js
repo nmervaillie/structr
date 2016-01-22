@@ -61,7 +61,7 @@ var Command = {
 	 *
 	 * The server will return a list of nodes of the given type.
 	 *
-	 * The optional callback function will be executed for each node in the result set.
+	 * The optional callback function will be executed with the complete result set as parameter.
 	 */
 	getByType: function(type, pageSize, page, sort, order, properties, includeDeletedAndHidden, callback) {
 		var obj = {};
@@ -110,7 +110,7 @@ var Command = {
 	 * The server will return a result set containing all items of the given
 	 * type which are not children of another node to the sending client (no broadcast).
 	 *
-	 * The optional callback function will be executed for each node in the result set.
+	 * The optional callback function will be executed with the complete result set as parameter.
 	 */
 	list: function(type, rootOnly, pageSize, page, sort, order, properties, callback) {
 		var obj = {};
@@ -133,7 +133,7 @@ var Command = {
 	 * The server will return a result set containing all query results that match the
      * given type and property values.
 	 *
-	 * The optional callback function will be executed for each node in the result set.
+	 * The optional callback function will be executed with the complete result set as parameter.
 	 */
 	query: function(type, pageSize, page, sort, order, properties, callback) {
 		var obj = {};

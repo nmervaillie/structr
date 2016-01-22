@@ -153,6 +153,7 @@ public abstract class DOMNode extends LinkedTreeNode<DOMChildren, DOMSiblings, D
 
 	public static final Property<String> dataStructrIdProperty = new StringProperty("data-structr-id");
 	public static final Property<String> dataHashProperty = new StringProperty("data-structr-hash");
+	public static final Property<String> dataStructrAreaProperty = new StringProperty("data-structr-area");
 
 	static {
 

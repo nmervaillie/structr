@@ -95,6 +95,11 @@ $(function() {
 		Structr.activateModule(e, 'graph');
 	});
 
+	$('#app-builder_').on('click', function(e) {
+		Structr.activateModule(e, 'app-builder');
+		_AppBuilder.resize();
+	});
+
 	$('#pages_').on('click', function(e) {
 		Structr.activateModule(e, 'pages');
 		_Pages.resize();

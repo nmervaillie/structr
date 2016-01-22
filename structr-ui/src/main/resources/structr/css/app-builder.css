@@ -1,0 +1,85 @@
+/*
+ Copyright (C) 2010-2016 Structr GmbH
+
+ This file is part of Structr <http://structr.org>.
+
+ Structr is free software: you can redistribute it and/or modify
+ it under the terms of the GNU Affero General Public License as
+ published by the Free Software Foundation, either version 3 of the
+ License, or (at your option) any later version.
+
+ Structr is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU Affero General Public License
+ along with Structr.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+#app-builder {
+    width: 100%;
+}
+
+#page-area {
+    /*border-radius: .6em;*/
+    margin: 1em 0 0 1em;
+    padding: 1em;
+    background-color: #fff;
+    float: left;
+    border: .1em solid #ccc;
+}
+
+#widget-area {
+    /*border-radius: .6em;*/
+    margin: 1em;
+    padding: 1em;
+    background-color: #fff;
+    float: left;
+    border: .1em solid #ccc;
+}
+
+#page-area .page-tn {
+    width: 24em;
+    margin: 1em;
+    float: left;
+}
+
+#page-area .page-tn .page-preview {
+    border: .1em solid #bbb;
+    /*border-radius: .1em;*/
+    height: 24em;
+}
+
+#page-area .page-tn .page-preview:hover {
+    opacity: .8;
+}
+
+#page-area iframe.preview {
+    border: none;
+    height: 100%;
+    width: 100%;
+}
+
+#page-area .page-tn .page-preview iframe.preview {
+    height: 400%;
+    width: 400%;
+    zoom: 0.25;
+    -moz-transform: scale(0.25);
+    -moz-transform-origin: 0 0;
+    -o-transform: scale(0.25);
+    -o-transform-origin: 0 0;
+    -webkit-transform: scale(0.25);
+    -webkit-transform-origin: 0 0;
+}
+
+#page-area .page-tn .page-name {
+    width: 100%;
+    text-align: center;
+    line-height: 2em;
+    color: #000;
+}
+
+#page-area .page-tn:hover .page-name {
+    opacity: .8;
+}
