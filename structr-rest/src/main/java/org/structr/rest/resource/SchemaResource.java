@@ -97,7 +97,7 @@ public class SchemaResource extends Resource {
 
 	@Override
 	public RestMethodResult doPost(Map<String, Object> propertySet) throws FrameworkException {
-		throw new IllegalMethodException();
+		throw new IllegalMethodException("POST not allowed on " + getResourceSignature());
 	}
 
 	@Override
@@ -119,8 +119,7 @@ public class SchemaResource extends Resource {
 
 			logger.log(Level.WARNING, "Trying to combine SchemaResource with null.");
 		}
-
-		throw new IllegalPathException();
+		throw new IllegalPathException("Illegal path, /" + getResourceSignature() + " must be followed by a type resource");
 	}
 
 	@Override

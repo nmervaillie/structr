@@ -73,7 +73,7 @@ public class ResourceHelper {
 		// intercept empty path and send 204 No Content
 		if (StringUtils.isBlank(path)) {
 
-			throw new NoResultsException();
+			throw new NoResultsException("No content");
 		}
 
 		// 1.: split request path into URI parts
@@ -158,7 +158,7 @@ public class ResourceHelper {
 
 				if (!found) {
 
-					throw new NotFoundException();
+					throw new NotFoundException("Cannot resolve URL path");
 				}
 
 			}
@@ -251,7 +251,7 @@ public class ResourceHelper {
 			logger.log(Level.WARNING, "Resource chain evaluation resulted in {0} entries, returning status code 400.", resourceChain.size());
 		}
 
-		throw new IllegalPathException();
+		throw new IllegalPathException("Cannot resolve URL path");
 
 	}
 
