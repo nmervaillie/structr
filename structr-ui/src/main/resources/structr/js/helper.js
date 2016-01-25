@@ -63,6 +63,7 @@ function escapeForHtmlAttributes(str, escapeWhitespace) {
 			.replace(/</g, '&lt;')
 			.replace(/>/g, '&gt;')
 			.replace(/"/g, '&quot;')
+			.replace(/\//g,'&#47;')
 			.replace(/'/g, '&#39;');
 
 	return escapeWhitespace ? escapedStr.replace(/ /g, '&nbsp;') : escapedStr;
