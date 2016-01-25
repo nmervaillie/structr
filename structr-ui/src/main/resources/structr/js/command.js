@@ -279,7 +279,7 @@ var Command = {
 	 * The server will remove the node with the given sourceId from the node
 	 * with the given targetId and broadcast a removal notification.
 	 */
-	removeSourceFromTarget: function(entityId, parentId) {
+	removeSourceFromTarget: function(entityId, parentId, callback) {
 		log('Remove ' + entityId + ' from ' + parentId);
 		var obj = {};
 		obj.command = 'REMOVE';
@@ -287,8 +287,8 @@ var Command = {
 		var data = {};
 		data.id = parentId;
 		obj.data = data;
-		log('removeSourceFromTarget()', obj);
-		return sendObj(obj);
+		log('removeSourceFromTarget()', obj, callback);
+		return sendObj(obj, callback);
 	},
 	/**
 	 * Send a REMOVE command to the server.
@@ -844,7 +844,7 @@ var Command = {
 	 *
 	 * The server will broadcast a CREATE and an ADD notification.
 	 */
-	clonePage: function(id) {
+	clonePage: function(id, callback) {
 		var nodeData = {};
 		if (!nodeData.name) {
 			nodeData.name = 'New Page ' + Math.floor(Math.random() * (999999 - 1));
@@ -853,8 +853,8 @@ var Command = {
 		obj.data = nodeData;
 		obj.command = 'CLONE_PAGE';
 		obj.id = id;
-		log('clonePage()', obj);
-		return sendObj(obj);
+		log('clonePage()', obj, callback);
+		return sendObj(obj, callback);
 	},
 	/**
 	 * Send a CHUNK command to the server.

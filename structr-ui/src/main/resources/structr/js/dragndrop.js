@@ -135,9 +135,9 @@ var _Dragndrop = {
 			iframeFix: true,
 			//sortable: '.node',
 			appendTo: '#main',
-			helper: function (event, $el) {
-				$el.css({height: "17px"});
-				var hlp = $el.clone();
+			helper: function (e, el) {
+				el.css({ height: "17px" });
+				var hlp = el.clone();
 				hlp.find('.node').remove();
 				hlp.find('.expand_icon').attr('src', 'icon/tree_arrow_right.png');
 				return hlp;
@@ -333,7 +333,7 @@ var _Dragndrop = {
 		}
 		return false;
 	},
-	widgetDropped: function(source, target, pageId) {
+	widgetDropped: function(source, target, pageId, callback) {
 
 		Structr.modules['widgets'].unload();
 		Structr.makePagesMenuDroppable();
@@ -428,7 +428,11 @@ var _Dragndrop = {
 			} else {
 
 				// If no matches, directly append widget
-				Command.appendWidget(source.source, target.id, pageId, widgetsUrl);
+				Command.appendWidget(source.source, target.id, pageId, widgetsUrl, null, function() {
+					if (callback) {
+						callback();
+					}
+				});
 
 			}
 
