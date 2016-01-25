@@ -470,13 +470,13 @@ var StructrModel = {
 		Command.setProperties(id, data);
 	},
 
-	callCallback: function(callback, entity, resultSize) {
+	callCallback: function(callback, entity, resultSize, command) {
 		if (callback) {
-			log('Calling callback', callback, 'on entity', entity, resultSize);
+			log('Calling callback', callback, 'on entity', entity, resultSize, command);
 			var callbackFunction = StructrModel.callbacks[callback];
 			if (callback && callbackFunction) {
 				log(callback, callbackFunction.toString());
-				StructrModel.callbacks[callback](entity, resultSize);
+				StructrModel.callbacks[callback](entity, resultSize, command);
 			}
 		}
 	},

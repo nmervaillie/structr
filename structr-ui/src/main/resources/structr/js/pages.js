@@ -458,6 +458,8 @@ var _Pages = {
 		var name = $.trim(element.children('b.name_').attr('title'));
 		log('activateTab', element, name);
 
+		if (!previewTabs) return;
+
 		previewTabs.children('li').each(function() {
 			$(this).removeClass('active');
 		});
@@ -607,6 +609,8 @@ var _Pages = {
 		entity = StructrModel.ensureObject(entity);
 
 		var hasChildren = entity.children && entity.children.length;
+
+		if (!pages) return;
 
 		pages.append('<div id="id_' + entity.id + '" class="node page"></div>');
 		var div = Structr.node(entity.id);

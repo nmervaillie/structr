@@ -285,7 +285,7 @@ function wsConnect() {
 
 				obj = StructrModel.update(data);
 
-				if (StructrModel.callCallback(data.callback, obj)) {
+				if (StructrModel.callCallback(data.callback, obj, 1, command)) {
 					StructrModel.clearCallback(data.callback);
 				}
 
@@ -437,6 +437,9 @@ function wsConnect() {
 					log(command, 'Remove object from model', obj);
 					obj.remove();
 				}
+				
+				StructrModel.callCallback(data.callback, obj, 1, command);
+				StructrModel.clearCallback(data.callback);
 
 			} else if (command === 'CREATE' || command === 'ADD' || command === 'IMPORT') { /*********************** CREATE, ADD, IMPORT ************************/
 
