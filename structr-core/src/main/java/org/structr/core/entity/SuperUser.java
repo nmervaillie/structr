@@ -435,7 +435,7 @@ public class SuperUser implements Principal, AccessControllable {
 	}
 
 	@Override
-	public String getPropertyWithVariableReplacement(ActionContext renderContext, PropertyKey<String> key) throws FrameworkException {
+	public String getPropertyWithVariableReplacement(final ActionContext renderContext, final String value) throws FrameworkException {
 		throw new UnsupportedOperationException("Not supported."); //To change body of generated methods, choose Tools | Templates.
 	}
 

@@ -449,12 +449,14 @@ var _Widgets = {
 
 			} else {
 
-				Command.setProperty(entity.id, 'source', newText, false, function() {
-					dialogMsg.html('<div class="infoBox success">Widget saved.</div>');
-					$('.infoBox', dialogMsg).delay(2000).fadeOut(200);
-					text1 = newText;
-					dialogSaveButton.prop("disabled", true).addClass('disabled');
-					saveAndClose.prop("disabled", true).addClass('disabled');
+				Command.setProperty(entity.id, 'source', newText, false, function(obj) {
+					if (entity.id === obj.id) {
+						dialogMsg.html('<div class="infoBox success">Widget saved.</div>');
+						$('.infoBox', dialogMsg).delay(2000).fadeOut(200);
+						text1 = newText;
+						dialogSaveButton.prop("disabled", true).addClass('disabled');
+						saveAndClose.prop("disabled", true).addClass('disabled');
+					}
 				});
 
 			}

@@ -133,11 +133,13 @@ var _Entities = {
 		_Entities.activateInput(inp, entity.id);
 		var nullIcon = $('#null_' + key, el);
 		nullIcon.on('click', function() {
-			Command.setProperty(entity.id, key, null, false, function() {
-				inp.val(null);
-				blinkGreen(inp);
-				dialogMsg.html('<div class="infoBox success">Property "' + key + '" was set to null.</div>');
-				$('.infoBox', dialogMsg).delay(2000).fadeOut(1000);
+			Command.setProperty(entity.id, key, null, false, function(obj) {
+				if (entity.id === obj.id) {
+					inp.val(null);
+					blinkGreen(inp);
+					dialogMsg.html('<div class="infoBox success">Property "' + key + '" was set to null.</div>');
+					$('.infoBox', dialogMsg).delay(2000).fadeOut(1000);
+				}
 			});
 		});
 
@@ -485,6 +487,7 @@ var _Entities = {
 						_Entities.listProperties(entity, view, tabView, typeInfo);
 					}
 				});
+				
 			});
 		});
 		activeView = LSWrapper.getItem(activeEditTabPrefix  + '_' + entity.id) || activeView;
@@ -492,6 +495,19 @@ var _Entities = {
 
 	},
 	listProperties: function (entity, view, tabView, typeInfo) {
+		
+		if (view === '_html_') {
+			// for the html view, fetch all (custom) database properties
+			Command.getDatabaseProperties(entity.id, function(data) {
+				_Entities.listPropertiesInternal(entity, view, tabView, typeInfo, data.data);
+			});
+		} else {
+			_Entities.listPropertiesInternal(entity, view, tabView, typeInfo);
+		}
+
+	},
+	listPropertiesInternal: function(entity, view, tabView, typeInfo, databaseProperties) {
+		
 		var null_prefix = 'null_attr_';
 		$.ajax({
 			url: rootUrl + entity.id + (view ? '/' + view : '') + '?pageSize=10', // TODO: Implement paging or scroll-into-view here
@@ -502,6 +518,15 @@ var _Entities = {
 				var id = entity.id;
 				// ID of graph object to edit
 				$(data.result).each(function(i, res) {
+
+					if (databaseProperties) {
+						// add custom database properties
+						Object.keys(databaseProperties).forEach(function(databaseKey) {
+							if (databaseKey.startsWith(view)) {
+								res[databaseKey] = databaseProperties[databaseKey];
+							}
+						});
+					}
 
 					// reset id for each object group
 					id = entity.id;
@@ -616,6 +641,7 @@ var _Entities = {
 															dialogMsg.html('<div class="infoBox success">Related node "' + displayName + '" was removed from property "' + key + '".</div>');
 															$('.infoBox', dialogMsg).delay(2000).fadeOut(1000);
 															cell.empty();
+															$('#tabs .active').click();
 														} else {
 															blinkRed(cell);
 														}
@@ -632,6 +658,7 @@ var _Entities = {
 														Command.removeFromCollection(id, key, node.id, function() {
 															nodeEl.remove();
 															blinkGreen(cell);
+															$('#tabs .active').click();
 														});
 														return false;
 													});
@@ -665,6 +692,7 @@ var _Entities = {
 									if (isRelated) {
 										cell.empty();
 									}
+									$('#tabs .active').click();
 								} else {
 									blinkRed(input);
 								}
@@ -674,14 +702,14 @@ var _Entities = {
 							});
 						});
 					});
-					props.append('<tr class="hidden"><td class="key"><input type="text" class="newKey" name="key"></td><td class="value"><input type="text" value=""></td><td></td></tr>');
-					$('.props tr td.value input', dialog).each(function(i, v) {
-						_Entities.activateInput(v, id);
-					});
-
 
 					if (view === '_html_') {
 						$('input[name="_html_' + focusAttr + '"]', props).focus();
+
+						props.append('<tr><td class="key"><input type="text" class="newKey" name="key" data-view="' + view + '"></td><td class="value"><input type="text" value=""></td><td></td></tr>');
+						$('.props tr td.value input', dialog).each(function(i, v) {
+							_Entities.activateInput(v, id);
+						});
 
 						tabView.append('<button class="show-all">Show all attributes</button>');
 						$('.show-all', tabView).on('click', function() {
@@ -693,8 +721,7 @@ var _Entities = {
 
 				});
 			}
-		});
-
+		});		
 	},
 	appendRelatedNode: function(cell, props, id, key, node, onDelete) {
 		var displayName = _Crud.displayName(node);
@@ -737,15 +764,27 @@ var _Entities = {
 				log(keyInput);
 				if (keyInput && keyInput.length) {
 
-					var newKey = keyInput.val();
+					var view = keyInput.attr('data-view');
+					var key = keyInput.val();
+					if (view) {
+						key = view + key;
+					}
+
 					var val = input.val();
 
 					// new key
-					log('new key: Command.setProperty(', objId, newKey, val);
-					Command.setProperty(objId, newKey, val, false, function() {
-						blinkGreen(input);
-						dialogMsg.html('<div class="infoBox success">New property "' + newKey + '" was added and saved with value "' + val + '".</div>');
-						$('.infoBox', dialogMsg).delay(2000).fadeOut(1000);
+					log('new key: Command.setProperty(', objId, key, val);
+					Command.setProperty(objId, key, val, false, function(obj) {
+						if (obj.id === objId) {
+							blinkGreen(input);
+							if (view) {
+								window.setTimeout(function() {
+									$('#tab-' + view).click();
+								}, 1000);
+							}
+							dialogMsg.html('<div class="infoBox success">New property "' + key + '" was added and saved with value "' + val + '".</div>');
+							$('.infoBox', dialogMsg).delay(2000).fadeOut(1000);
+						}
 					});
 
 
@@ -778,8 +817,10 @@ var _Entities = {
 		}
 	},
 	setProperty: function(id, key, val, recursive, callback) {
-		Command.setProperty(id, key, val, recursive, function() {
-			Command.getProperty(id, key, callback);
+		Command.setProperty(id, key, val, recursive, function(obj) {
+			if (obj.id === id) {
+				Command.getProperty(id, key, callback);
+			}
 		});
 	},
 	appendAccessControlIcon: function(parent, entity) {
@@ -899,9 +940,11 @@ var _Entities = {
 		var btn = $('.apply_' + key, el);
 		btn.on('click', function() {
 			Command.setProperty(entity.id, key, $('.' + key + '_', el).val(), false, function(obj) {
-				log(key + ' successfully updated!', obj[key]);
-				blinkGreen(btn);
-				_Pages.reloadPreviews();
+				if (entity.id === obj.id) {
+					log(key + ' successfully updated!', obj[key]);
+					blinkGreen(btn);
+					_Pages.reloadPreviews();
+				}
 			});
 		});
 	},
@@ -913,9 +956,11 @@ var _Entities = {
 		var btn = $('.save_' + key, el);
 		btn.on('click', function() {
 			Command.setProperty(entity.id, key, $('.' + key + '_', el).val(), false, function(obj) {
-				log(key + ' successfully updated!', obj[key]);
-				blinkGreen(btn);
-				_Pages.reloadPreviews();
+				if (entity.id === obj.id) {
+					log(key + ' successfully updated!', obj[key]);
+					blinkGreen(btn);
+					_Pages.reloadPreviews();
+				}
 			});
 		});
 	},
@@ -973,8 +1018,10 @@ var _Entities = {
 				entity[key][subKey] = value;
 			}
 
-			Command.setProperty(entity.id, key, value, false, function() {
-				blinkGreen($('.' + key + 'Select_chosen .chosen-single'));
+			Command.setProperty(entity.id, key, value, false, function(obj) {
+				if (entity.id === obj.id) {
+					blinkGreen($('.' + key + 'Select_chosen .chosen-single'));
+				}
 			});
 		});
 	},

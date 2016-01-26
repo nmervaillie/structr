@@ -113,8 +113,9 @@ public class Importer {
 	private static App app;
 	private static ConfigurationProvider config;
 
-	private final static String DATA_STRUCTR_PREFIX = "data-structr-";
-	private final static String DATA_META_PREFIX    = "data-structr-meta-";
+	public final static String DATA_PREFIX         = "data-";
+	public final static String DATA_STRUCTR_PREFIX = "data-structr-";
+	public final static String DATA_META_PREFIX    = "data-structr-meta-";
 
 	static {
 
@@ -573,7 +574,7 @@ public class Importer {
 				}
 			}
 
-			org.structr.web.entity.dom.DOMNode newNode;
+			DOMNode newNode;
 
 			// create node
 			if (StringUtils.isBlank(tag)) {
@@ -624,7 +625,7 @@ public class Importer {
 
 						final String value = nodeAttr.getValue();
 
-						if (key.startsWith("data-")) {
+						if (key.startsWith(DATA_STRUCTR_PREFIX)) {
 
 							if (key.startsWith(DATA_META_PREFIX)) { // convert data-structr-meta-* attributes to local camel case properties on the node,
 
@@ -643,24 +644,11 @@ public class Importer {
 									}
 								}
 
-							} else
-							if (key.startsWith(DATA_STRUCTR_PREFIX)) { // don't convert data-structr-* attributes as they are internal
+							} else { // don't convert data-structr-* attributes as they are internal
 
-								PropertyKey propertyKey = config.getPropertyKeyForJSONName(newNode.getClass(), key);
-
-								if (propertyKey != null) {
-
-									final PropertyConverter inputConverter = propertyKey.inputConverter(securityContext);
-									if (value != null && inputConverter != null) {
-
-										newNode.setProperty(propertyKey, propertyKey.inputConverter(securityContext).convert(value));
-									} else {
-
-										newNode.setProperty(propertyKey, value);
-									}
-								}
+								// set as property, without _html_ prefix
+								setProperty(newNode, key, value, false);
 							}
-
 
 						} else {
 
@@ -680,7 +668,8 @@ public class Importer {
 
 							} else {
 
-								newNode.setProperty(new StringProperty(PropertyView.Html.concat(key)), value);
+								// Set as html propert (with _html_ prefix)
+								setProperty(newNode, key, value, true);
 							}
 
 						}
@@ -725,6 +714,35 @@ public class Importer {
 		}
 	}
 
+	/**
+	 * Set the property value for the given key on the given DOM node.
+	 * 
+	 * Try to find an existing property key. If not found, create a custom string property.
+	 * 
+	 * @param newNode
+	 * @param key
+	 * @param value
+	 * @param isHtmlPropertry
+	 * @throws FrameworkException 
+	 */
+	private void setProperty(final DOMNode newNode, final String key, final String value, final boolean isHtmlProperty) throws FrameworkException {
+		
+		final String internalKey = isHtmlProperty ? PropertyView.Html.concat(key) : key;
+		PropertyKey propertyKey = config.getPropertyKeyForJSONName(newNode.getClass(), internalKey);
+
+		if (propertyKey != null) {
+
+			final PropertyConverter inputConverter = propertyKey.inputConverter(securityContext);
+			if (value != null && inputConverter != null) {
+
+				newNode.setProperty(propertyKey, propertyKey.inputConverter(securityContext).convert(value));
+			} else {
+
+				newNode.setProperty(propertyKey, value);
+			}
+		}
+	}
+	
 	/**
 	 * Check whether a file with given name and checksum already exists
 	 */

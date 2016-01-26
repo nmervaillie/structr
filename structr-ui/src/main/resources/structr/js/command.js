@@ -190,6 +190,13 @@ var Command = {
 		log('getProperty()', obj, callback);
 		return sendObj(obj, callback);
 	},
+	getDatabaseProperties: function(id, callback) {
+		var obj = {};
+		obj.command = 'GET_DATABASE_PROPERTIES';
+		obj.id = id;
+		log('getDatabaseProperties()', obj, callback);
+		return sendObj(obj, callback);
+	},
 	/**
 	 * Send an SEARCH command to the server.
 	 *

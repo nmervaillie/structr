@@ -114,13 +114,17 @@ var _Dashboard = {
 //		console.log(meObj)
 		if (!meObj) {
 			Command.rest("/me/ui", function (result) {
-				Command.setProperty(result[0].id, 'localStorage', null, false, function() {
-					blinkGreen($('#clear-local-storage-on-server'));
+				Command.setProperty(result[0].id, 'localStorage', null, false, function(obj) {
+					if (result[0].id === obj.id) {
+						blinkGreen($('#clear-local-storage-on-server'));
+					}
 				});
 			});
 		} else {
-			Command.setProperty(meObj.id, 'localStorage', null, false, function() {
-				blinkGreen($('#clear-local-storage-on-server'));
+			Command.setProperty(meObj.id, 'localStorage', null, false, function(obj) {
+				if (meObj.id === obj.id) {
+					blinkGreen($('#clear-local-storage-on-server'));
+				}
 			});
 		}
 	}

@@ -35,6 +35,54 @@ import org.w3c.dom.NodeList;
  */
 public class ImporterTest extends StructrUiTest {
 
+	public void testBootstrapTabs() {
+		Services.getInstance().getCurrentConfig().setProperty(Services.JSON_INDENTATION,          "true");
+		Services.getInstance().getCurrentConfig().setProperty(Services.HTML_INDENTATION,          "true");
+
+		final String source = 
+		"<!DOCTYPE html>\n" +
+		"<html>\n" +
+		"	<head></head>\n" +
+		"	<body>\n" +
+		"		<div>\n" +
+		"			<ul class=\"nav nav-tabs\" role=\"tablist\">\n" +
+		"				<li role=\"presentation\" class=\"active\"><a href=\"#home\" aria-controls=\"home\" role=\"tab\" data-toggle=\"tab\">Home</a></li>\n" +
+		"				<li role=\"presentation\"><a href=\"#profile\" aria-controls=\"profile\" role=\"tab\" data-toggle=\"tab\">Profile</a></li>\n" +
+		"				<li role=\"presentation\"><a href=\"#messages\" aria-controls=\"messages\" role=\"tab\" data-toggle=\"tab\">Messages</a></li>\n" +
+		"				<li role=\"presentation\"><a href=\"#settings\" aria-controls=\"settings\" role=\"tab\" data-toggle=\"tab\">Settings</a></li>\n" +
+		"			</ul>\n" +
+		"			<div class=\"tab-content\">\n" +
+		"				<div role=\"tabpanel\" class=\"tab-pane active\" id=\"home\">\n" +
+		"					<h4>Home Tab</h4>\n" +
+		"					<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\n" +
+		"				</div>\n" +
+		"				<div role=\"tabpanel\" class=\"tab-pane\" id=\"profile\">\n" +
+		"					<h4>Profile Tab</h4>\n" +
+		"					<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\n" +
+		"				</div>\n" +
+		"				<div role=\"tabpanel\" class=\"tab-pane\" id=\"messages\">\n" +
+		"					<h4>Messages Tab</h4>\n" +
+		"					<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\n" +
+		"				</div>\n" +
+		"				<div role=\"tabpanel\" class=\"tab-pane\" id=\"settings\">\n" +
+		"					<h4>Settings Tab</h4>\n" +
+		"					<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\n" +
+		"				</div>\n" +
+		"			</div>\n" +
+		"		</div>\n" +
+		"	</body>\n" +
+		"</html>";
+		
+		final String result = testImportWidget(source, RenderContext.EditMode.NONE);
+		
+		System.out.println(result);
+		
+		assertEquals(source, result);
+		
+		
+		
+	}
+	
 	public void testBootstrapJumbotronEditModeNone() {
 
 		Services.getInstance().getCurrentConfig().setProperty(Services.JSON_INDENTATION,          "true");

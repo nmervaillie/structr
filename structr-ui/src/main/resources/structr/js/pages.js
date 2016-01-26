@@ -522,7 +522,7 @@ var _Pages = {
 		var autoRefreshDisabled = LSWrapper.getItem(autoRefreshDisabledKey + id);
 		if (!autoRefreshDisabled && id) {
 			Command.get(id, function(obj) {
-				log('reloading preview iframe', id, obj.name);
+				//log('reloading preview iframe', id, obj.name);
 				var v = obj.version || 0;
 				var s = pageVersion[id] || 0;
 				log('stored version:', s, 'current version:', v);

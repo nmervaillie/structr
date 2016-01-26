@@ -74,6 +74,8 @@ var StructrModel = {
 		
 		var obj;
 		
+		if (!data) return;
+		
 		if (data.isPage) {
 
 			obj = new StructrPage(data);
@@ -475,7 +477,7 @@ var StructrModel = {
 			log('Calling callback', callback, 'on entity', entity, resultSize, command);
 			var callbackFunction = StructrModel.callbacks[callback];
 			if (callback && callbackFunction) {
-				log(callback, callbackFunction.toString());
+				//log(callback, callbackFunction.toString());
 				StructrModel.callbacks[callback](entity, resultSize, command);
 			}
 		}

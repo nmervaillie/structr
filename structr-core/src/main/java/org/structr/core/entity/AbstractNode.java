@@ -1475,8 +1475,8 @@ public abstract class AbstractNode implements NodeInterface, AccessControllable,
 	}
 
 	@Override
-	public String getPropertyWithVariableReplacement(ActionContext renderContext, PropertyKey<String> key) throws FrameworkException {
-		return Scripting.replaceVariables(renderContext, this, getProperty(key));
+	public String getPropertyWithVariableReplacement(final ActionContext renderContext, final String value) throws FrameworkException {
+		return Scripting.replaceVariables(renderContext, this, value);
 	}
 
 	@Override

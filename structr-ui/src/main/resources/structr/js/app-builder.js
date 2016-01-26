@@ -430,6 +430,10 @@ var _AppBuilder = {
 				linkElements.each(function(i, link) {
 					doc.find('head').append($(link).clone());
 				});
+				var scriptElements = $('#preview_' + currentPage.id).contents().find('script');
+				scriptElements.each(function(i, script) {
+					doc.find('head').append($(script).clone());
+				});
 			}
 
 			doc.find('body').append(widget.source);

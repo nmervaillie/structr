@@ -280,8 +280,10 @@ var _Dragndrop = {
 			} else if (tag.indexOf(':') !== -1) {
 				var type = tag.substring(1);
 				Command.setProperty(target.id, 'restQuery', pluralize(type.toLowerCase()));
-				Command.setProperty(target.id, 'dataKey', type.toLowerCase(), false, function() {
-					_Pages.reloadPreviews();
+				Command.setProperty(target.id, 'dataKey', type.toLowerCase(), false, function(obj) {
+					if (obj.id === target.id) {
+						_Pages.reloadPreviews();
+					}
 				});
 			} else {
 				return _Dragndrop.htmlElementFromPaletteDropped(tag, target, pageId);

@@ -39,61 +39,46 @@ import org.structr.schema.parser.DatePropertyParser;
  */
 public class Scripting {
 
-	public static String replaceVariables(final ActionContext actionContext, final GraphObject entity, final Object rawValue) throws FrameworkException {
+	public static String replaceVariables(final ActionContext actionContext, final GraphObject entity, String value) throws FrameworkException {
 
-		if (rawValue == null) {
+		if (value == null) {
 
 			return null;
 		}
 
-		String value;
+		if (!actionContext.returnRawValue()) {
 
-		if (rawValue instanceof String) {
+			final List<Tuple> replacements = new LinkedList<>();
 
-			value = (String) rawValue;
+			for (final String expression : extractScripts(value)) {
 
-			if (!actionContext.returnRawValue()) {
+				final Object extractedValue = evaluate(actionContext, entity, expression);
+				String partValue            = extractedValue != null ? formatToDefaultDateOrString(extractedValue) : "";
 
-				final List<Tuple> replacements = new LinkedList<>();
+				if (partValue != null) {
 
-				for (final String expression : extractScripts(value)) {
+					replacements.add(new Tuple(expression, partValue));
 
-					final Object extractedValue = evaluate(actionContext, entity, expression);
-					String partValue            = extractedValue != null ? formatToDefaultDateOrString(extractedValue) : "";
+				} else {
 
-					if (partValue != null) {
-
-						replacements.add(new Tuple(expression, partValue));
-
-					} else {
-
-						// If the whole expression should be replaced, and partValue is null
-						// replace it by null to make it possible for HTML attributes to not be rendered
-						// and avoid something like ... selected="" ... which is interpreted as selected==true by
-						// all browsers
-						if (!value.equals(expression)) {
-							replacements.add(new Tuple(expression, ""));
-						}
+					// If the whole expression should be replaced, and partValue is null
+					// replace it by null to make it possible for HTML attributes to not be rendered
+					// and avoid something like ... selected="" ... which is interpreted as selected==true by
+					// all browsers
+					if (!value.equals(expression)) {
+						replacements.add(new Tuple(expression, ""));
 					}
-				}
-
-				// apply replacements
-				for (final Tuple tuple : replacements) {
-
-					// only replace a single occurrence at a time!
-					value = StringUtils.replaceOnce(value, tuple.key, tuple.value);
 				}
 			}
 
-		} else if (rawValue instanceof Boolean) {
+			// apply replacements
+			for (final Tuple tuple : replacements) {
 
-			value = Boolean.toString((Boolean) rawValue);
-
-		} else {
-
-			value = rawValue.toString();
-
+				// only replace a single occurrence at a time!
+				value = StringUtils.replaceOnce(value, tuple.key, tuple.value);
+			}
 		}
+
 
 		// return literal null
 		if (Functions.NULL_STRING.equals(value)) {

@@ -37,7 +37,7 @@ public class CypherGraphDataSource implements GraphDataSource<List<GraphObject>>
 	@Override
 	public List<GraphObject> getData(final RenderContext renderContext, final AbstractNode referenceNode) throws FrameworkException {
 
-		final String cypherQuery = ((DOMNode) referenceNode).getPropertyWithVariableReplacement(renderContext, DOMNode.cypherQuery);
+		final String cypherQuery = ((DOMNode) referenceNode).getPropertyWithVariableReplacement(renderContext, referenceNode.getProperty(DOMNode.cypherQuery));
 		if (cypherQuery == null || cypherQuery.isEmpty()) {
 
 			return null;

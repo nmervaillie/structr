@@ -67,7 +67,7 @@ public class RestDataSource implements GraphDataSource<List<GraphObject>> {
 	@Override
 	public List<GraphObject> getData(final RenderContext renderContext, AbstractNode referenceNode) throws FrameworkException {
 
-		final String restQuery = ((DOMNode) referenceNode).getPropertyWithVariableReplacement(renderContext, DOMNode.restQuery);
+		final String restQuery = ((DOMNode) referenceNode).getPropertyWithVariableReplacement(renderContext, referenceNode.getProperty(DOMNode.restQuery));
 		if (restQuery == null || restQuery.isEmpty()) {
 			return Collections.EMPTY_LIST;
 		}

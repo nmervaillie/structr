@@ -190,10 +190,12 @@ var _Security = {
 		bitmaskInput.on('blur', function() {
 			var id = tr.attr('id').substring(3);
 			var newFlags = $(this).val();
-			Command.setProperty(id, 'flags', newFlags, false, function() {
-				Command.get(id, function(obj) {
-					_Security.appendResourceAccessElement(obj, tr);
-				});
+			Command.setProperty(id, 'flags', newFlags, false, function(obj) {
+				if (id === obj.id) {
+					Command.get(id, function(obj) {
+						_Security.appendResourceAccessElement(obj, tr);
+					});
+				}
 			});
 		});
 
@@ -201,10 +203,12 @@ var _Security = {
 			if (e.keyCode === 13) {
 				var id = tr.attr('id').substring(3);
 				var newFlags = $(this).val();
-				Command.setProperty(id, 'flags', newFlags, false, function() {
-					Command.get(id, function(obj) {
-						_Security.appendResourceAccessElement(obj, tr);
-					});
+				Command.setProperty(id, 'flags', newFlags, false, function(obj) {
+					if (id === obj.id) {
+						Command.get(id, function(obj) {
+							_Security.appendResourceAccessElement(obj, tr);
+						});
+					}
 				});
 			}
 		});
@@ -242,10 +246,12 @@ var _Security = {
 			tr.find('input:checked').each(function(i, input) {
 				newFlags += parseInt($(input).attr('data-flag'));
 			});
-			Command.setProperty(id, 'flags', newFlags, false, function() {
-				Command.get(id, function(obj) {
-					_Security.appendResourceAccessElement(obj, tr);
-				});
+			Command.setProperty(id, 'flags', newFlags, false, function(obj) {
+				if (id === obj.id) {				
+					Command.get(id, function(obj) {
+						_Security.appendResourceAccessElement(obj, tr);
+					});
+				}
 			});
 		});
 

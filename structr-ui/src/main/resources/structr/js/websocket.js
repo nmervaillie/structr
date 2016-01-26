@@ -293,7 +293,12 @@ function wsConnect() {
 
 				StructrModel.callCallback(data.callback, result[0]);
 
-			} else if (command.startsWith('GET') || command === 'GET_BY_TYPE' || command === 'GET_SCHEMA_INFO' || command === 'CREATE_RELATIONSHIP') { /*********************** GET_BY_TYPE ************************/
+			} else if (command === 'GET_DATABASE_PROPERTIES') { /*********************** GET_DATABASE_PROPERTIES ************************/
+
+				StructrModel.callCallback(data.callback, data);
+				StructrModel.clearCallback(data.callback);
+
+			} else if (command.startsWith('GET') || command === 'GET_BY_TYPE' || command === 'GET_SCHEMA_INFO' || command === 'CREATE_RELATIONSHIP') { /*********************** GET*, GET_BY_TYPE, GET_SCHEMA_INFO, CREATE_RELATIONSHIP ************************/
 
 				log(command, data);
 

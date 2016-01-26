@@ -1543,15 +1543,17 @@ var _Schema = {
 				return;
 			}
 
-			Command.setProperty(entity.id, key, text2, false, function() {
-				dialogMsg.html('<div class="infoBox success">Code saved.</div>');
-				$('.infoBox', dialogMsg).delay(2000).fadeOut(200);
-				_Schema.reload();
-				dialogSaveButton.prop("disabled", true).addClass('disabled');
-				saveAndClose.prop("disabled", true).addClass('disabled');
-				Command.getProperty(entity.id, key, function(newText) {
-					text = newText;
-				});
+			Command.setProperty(entity.id, key, text2, false, function(obj) {
+				if (entity.id === obj.id) {
+					dialogMsg.html('<div class="infoBox success">Code saved.</div>');
+					$('.infoBox', dialogMsg).delay(2000).fadeOut(200);
+					_Schema.reload();
+					dialogSaveButton.prop("disabled", true).addClass('disabled');
+					saveAndClose.prop("disabled", true).addClass('disabled');
+					Command.getProperty(entity.id, key, function(newText) {
+						text = newText;
+					});
+				}
 			});
 
 		});
@@ -2422,7 +2424,7 @@ var _Schema = {
 
 			Command.snapshots("list", "", null, function(data) {
 
-				var snapshots = data.snapshots; console.log(data)
+				var snapshots = data.snapshots;
 
 				snapshots.forEach(function(snapshot, i) {
 					table.append('<tr><td>' + snapshot + '</td><td style="text-align:right;"><button id="delete-' + i + '">Delete</button><button id="add-' + i + '">Add</button><button id="restore-' + i + '">Restore</button></td></tr>');
@@ -2446,7 +2448,7 @@ var _Schema = {
 					});
 					$('#add-' + i).on('click', function() {
 
-						Command.snapshots("add", snapshot, null, function(data) {  console.log(data)
+						Command.snapshots("add", snapshot, null, function(data) {
 
 							var status = data.status;
 

@@ -328,7 +328,7 @@ public class Content extends DOMNode implements Text {
 			String _contentType = getProperty(contentType);
 
 			// fetch content with variable replacement
-			String _content = getPropertyWithVariableReplacement(renderContext, Content.content);
+			String _content = getPropertyWithVariableReplacement(renderContext, getProperty(Content.content));
 
 			if (!(EditMode.RAW.equals(edit) || EditMode.WIDGET.equals(edit)) && (_contentType == null || ("text/plain".equals(_contentType)))) {
 

@@ -36,7 +36,6 @@ import org.structr.common.error.ErrorBuffer;
 import org.structr.common.error.FrameworkException;
 import org.structr.core.GraphObject;
 import org.structr.core.Result;
-import org.structr.core.Services;
 import org.structr.core.app.StructrApp;
 import org.structr.core.entity.AbstractRelationship;
 import org.structr.core.property.BooleanProperty;
@@ -44,6 +43,7 @@ import org.structr.core.property.GenericProperty;
 import org.structr.core.property.Property;
 import org.structr.core.property.PropertyKey;
 import org.structr.core.property.StringProperty;
+import org.structr.web.Importer;
 import org.structr.web.common.AsyncBuffer;
 import org.structr.web.common.HtmlProperty;
 import org.structr.web.common.RenderContext;
@@ -168,6 +168,24 @@ public class DOMElement extends DOMNode implements Element, NamedNodeMap {
 	// The role attribute, see http://www.w3.org/TR/role-attribute/
 	public static final Property<String> _role = new HtmlProperty("role");
 
+	// Global ARIA attributes, see https://www.w3.org/TR/html-aria/#index-aria-global
+//	public static final Property<String> _aria_atomic = new HtmlProperty("aria-atomic");
+//	public static final Property<String> _aria_busy = new HtmlProperty("aria-busy");
+//	public static final Property<String> _aria_controls = new HtmlProperty("aria-controls");
+//	public static final Property<String> _aria_describedby = new HtmlProperty("aria-describedby");
+//	public static final Property<String> _aria_disabled = new HtmlProperty("aria-disabled");
+//	public static final Property<String> _aria_dropeffect = new HtmlProperty("aria-dropeffect");
+//	public static final Property<String> _aria_flowto = new HtmlProperty("aria-flowto");
+//	public static final Property<String> _aria_grabbed = new HtmlProperty("aria-grabbed");
+//	public static final Property<String> _aria_haspopup = new HtmlProperty("aria-haspopup");
+//	public static final Property<String> _aria_hidden = new HtmlProperty("aria-hidden");
+//	public static final Property<String> _aria_invalid = new HtmlProperty("aria-invalid");
+//	public static final Property<String> _aria_label = new HtmlProperty("aria-label");
+//	public static final Property<String> _aria_labelledby = new HtmlProperty("aria-labelledby");
+//	public static final Property<String> _aria_live = new HtmlProperty("aria-live");
+//	public static final Property<String> _aria_owns = new HtmlProperty("aria-owns");
+//	public static final Property<String> _aria_relevant = new HtmlProperty("aria-relevant");
+	
 	public static final org.structr.common.View publicView = new org.structr.common.View(DOMElement.class, PropertyView.Public,
 		name, tag, pageId, path, parent, children, restQuery, cypherQuery, xpathQuery, functionQuery, partialUpdateKey, dataKey, syncedNodes, sharedComponent, isDOMNode
 	);
@@ -186,6 +204,7 @@ public class DOMElement extends DOMNode implements Element, NamedNodeMap {
 		_onmouseout, _onmouseover, _onmouseup, _onmousewheel, _onpause, _onplay, _onplaying, _onprogress, _onratechange,
 		_onreadystatechange, _onreset, _onscroll, _onseeked, _onseeking, _onselect, _onshow, _onstalled, _onsubmit, _onsuspend,
 		_ontimeupdate, _onvolumechange, _onwaiting, _role
+		//_aria_atomic, _aria_busy, _aria_controls, _aria_describedby, _aria_disabled, _aria_dropeffect, _aria_flowto, _aria_grabbed, _aria_haspopup, _aria_hidden, _aria_invalid, _aria_label, _aria_labelledby, _aria_live, _aria_owns,
 	);
 
 	@Override
@@ -223,28 +242,93 @@ public class DOMElement extends DOMNode implements Element, NamedNodeMap {
 
 		out.append("<").append(tag);
 
-		for (PropertyKey attribute : StructrApp.getConfiguration().getPropertySet(entityType, PropertyView.Html)) {
+		final Iterable<String> props = dbNode.getPropertyKeys();
+		//final Set<PropertyKey> htmlKeys = StructrApp.getConfiguration().getPropertySet(entityType, PropertyView.Html);
 
-			String value = getPropertyWithVariableReplacement(renderContext, attribute);
-
-			if (!(EditMode.RAW.equals(editMode) || EditMode.WIDGET.equals(editMode))) {
-
-				value = escapeForHtmlAttributes(value);
-
-			}
-
+		for (final String key : props) {
+		
+			String value = getPropertyWithVariableReplacement(renderContext, dbNode.getProperty(key).toString());
+			
 			if (value != null) {
+				
+				// check if key is part of html view
+				if (StringUtils.startsWith(key, PropertyView.Html)) {
 
-				String key = attribute.jsonName().substring(PropertyView.Html.length());
+					//final HtmlProperty htmlProperty = new HtmlProperty(key);
 
-				out.append(" ").append(key).append("=\"").append(value).append("\"");
+					// The html view contains only HtmlProperty attributes (which hold String values) so this assumption (type-cast) is safe
+					//String value = getPropertyWithVariableReplacement(renderContext, getProperty(htmlProperty));
 
+					if (!(EditMode.RAW.equals(editMode) || EditMode.WIDGET.equals(editMode))) {
+
+						value = escapeForHtmlAttributes(value);
+					}
+
+					final String dbKey = key.substring(PropertyView.Html.length());
+
+					// strip _html_ prefix before output
+					out.append(" ").append(dbKey).append("=\"").append(value).append("\"");
+
+				} else if (key.startsWith("data-") && !(key.startsWith("data-structr-"))) {
+
+					if (!(EditMode.RAW.equals(editMode) || EditMode.WIDGET.equals(editMode))) {
+
+						value = escapeForHtmlAttributes(value);
+					}
+
+					out.append(" ").append(key).append("=\"").append(value).append("\"");
+					
+					migrateDataAttribute(key);
+				}
 			}
-
+			
 		}
 
-		// include arbitrary data-* attributes
-		renderCustomAttributes(out, securityContext, renderContext);
+		if (EditMode.RAW.equals(editMode) || EditMode.WIDGET.equals(editMode)) {
+
+			Property[] rawProps = new Property[]{
+				dataKey, restQuery, cypherQuery, xpathQuery, functionQuery, hideOnIndex, hideOnDetail, showForLocales, hideForLocales, showConditions, hideConditions
+			};
+
+//			// In raw mode, add query-related data
+//			String _dataKey		= getProperty(dataKey);
+//			String _restQuery	= getProperty(restQuery);
+//			String _cypherQuery	= getProperty(cypherQuery);
+//			String _xpathQuery	= getProperty(xpathQuery);
+//
+//			// Add filter to raw output
+//			boolean _hideOnIndex = getProperty(hideOnIndex);
+//			boolean _hideOnDetail = getProperty(hideOnDetail);
+//			String _showForLocales = getProperty(showForLocales);
+//			String _hideForLocales = getProperty(hideForLocales);
+//			String _showConditions = getProperty(showConditions);
+//			String _hideConditions = getProperty(hideConditions);
+			for (Property p : rawProps) {
+
+				if (p instanceof BooleanProperty) {
+
+				}
+
+				String htmlName = "data-structr-meta-" + CaseHelper.toUnderscore(p.jsonName(), false).replaceAll("_", "-");
+				Object value = getProperty(p);
+				if ((p instanceof BooleanProperty && (boolean) value) || (!(p instanceof BooleanProperty) && value != null && StringUtils.isNotBlank(value.toString()))) {
+					out.append(" ").append(htmlName).append("=\"").append(value.toString()).append("\"");
+				}
+			}
+
+//			if (StringUtils.isNotBlank(_restQuery)) {
+//				buffer.append(" ").append("data-structr-meta-rest-query").append("=\"").append(_restQuery).append("\"");
+//			}
+//
+//			if (StringUtils.isNotBlank(_cypherQuery)) {
+//				buffer.append(" ").append("data-structr-meta-cypher-query").append("=\"").append(_cypherQuery).append("\"");
+//			}
+//
+//			if (StringUtils.isNotBlank(_xpathQuery)) {
+//				buffer.append(" ").append("data-structr-meta-xpath-query").append("=\"").append(_xpathQuery).append("\"");
+//			}
+		}
+		
 
 		// include special mode attributes
 		switch (editMode) {
@@ -825,82 +909,35 @@ public class DOMElement extends DOMNode implements Element, NamedNodeMap {
 	}
 
 	/**
-	 * Render all the data-* attributes
-	 *
-	 * @param securityContext
-	 * @param renderContext
+	 * Temporary method add "_html_" prefix to "data-" attribute which is not "data-structr-" attrbutes.
+	 * 
+	 * @param node 
 	 */
-	private void renderCustomAttributes(final AsyncBuffer out, final SecurityContext securityContext, final RenderContext renderContext) throws FrameworkException {
-
-		dbNode = this.getNode();
-		EditMode editMode = renderContext.getEditMode(securityContext.getUser(false));
-
-		Iterable<String> props = dbNode.getPropertyKeys();
-		for (String key : props) {
-
-			if (key.startsWith("data-")) {
-
-				String value = getPropertyWithVariableReplacement(renderContext, new GenericProperty(key)).trim();
-
-				if (!(EditMode.RAW.equals(editMode) || EditMode.WIDGET.equals(editMode))) {
-
-					value = escapeForHtmlAttributes(value);
-
-				}
-
-				if (StringUtils.isNotBlank(value)) {
-
-					out.append(" ").append(key).append("=\"").append(value).append("\"");
-
-				}
-
-			}
-
+	private void migrateDataAttribute(final String key) {
+		
+		if (key == null) {
+			
+			// migration not possible
+			return;
 		}
-
-		if (EditMode.RAW.equals(editMode) || EditMode.WIDGET.equals(editMode)) {
-
-			Property[] rawProps = new Property[]{
-				dataKey, restQuery, cypherQuery, xpathQuery, functionQuery, hideOnIndex, hideOnDetail, showForLocales, hideForLocales, showConditions, hideConditions
-			};
-
-//			// In raw mode, add query-related data
-//			String _dataKey		= getProperty(dataKey);
-//			String _restQuery	= getProperty(restQuery);
-//			String _cypherQuery	= getProperty(cypherQuery);
-//			String _xpathQuery	= getProperty(xpathQuery);
-//
-//			// Add filter to raw output
-//			boolean _hideOnIndex = getProperty(hideOnIndex);
-//			boolean _hideOnDetail = getProperty(hideOnDetail);
-//			String _showForLocales = getProperty(showForLocales);
-//			String _hideForLocales = getProperty(hideForLocales);
-//			String _showConditions = getProperty(showConditions);
-//			String _hideConditions = getProperty(hideConditions);
-			for (Property p : rawProps) {
-
-				if (p instanceof BooleanProperty) {
-
-				}
-
-				String htmlName = "data-structr-meta-" + CaseHelper.toUnderscore(p.jsonName(), false).replaceAll("_", "-");
-				Object value = getProperty(p);
-				if ((p instanceof BooleanProperty && (boolean) value) || (!(p instanceof BooleanProperty) && value != null && StringUtils.isNotBlank(value.toString()))) {
-					out.append(" ").append(htmlName).append("=\"").append(value.toString()).append("\"");
-				}
-			}
-
-//			if (StringUtils.isNotBlank(_restQuery)) {
-//				buffer.append(" ").append("data-structr-meta-rest-query").append("=\"").append(_restQuery).append("\"");
-//			}
-//
-//			if (StringUtils.isNotBlank(_cypherQuery)) {
-//				buffer.append(" ").append("data-structr-meta-cypher-query").append("=\"").append(_cypherQuery).append("\"");
-//			}
-//
-//			if (StringUtils.isNotBlank(_xpathQuery)) {
-//				buffer.append(" ").append("data-structr-meta-xpath-query").append("=\"").append(_xpathQuery).append("\"");
-//			}
+		
+		if (key.startsWith(PropertyView.Html)) {
+			
+			// no migration necessary
+			return;
+		}
+		
+		if (key.startsWith(Importer.DATA_STRUCTR_PREFIX)) {
+			
+			// no migration necessary
+			return;
+			
+		}
+		
+		if (key.startsWith(Importer.DATA_PREFIX)) {
+			
+			dbNode.setProperty(PropertyView.Html.concat(key), dbNode.getProperty(key));
+			dbNode.removeProperty(key);
 		}
 	}
 
@@ -956,7 +993,7 @@ public class DOMElement extends DOMNode implements Element, NamedNodeMap {
 
 		}
 
-		dbNode = this.getNode();
+//		dbNode = this.getNode();
 
 		Iterable<String> props = dbNode.getPropertyKeys();
 		for (String key : props) {
