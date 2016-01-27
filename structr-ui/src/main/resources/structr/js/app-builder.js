@@ -277,7 +277,7 @@ var _AppBuilder = {
 			pages.forEach(function(page) {
 				if (x>c) { x = 0; y++ };
 				pagesArea.append('<div id="page-tn-' + page.id + '" class="page-tn"><div class="page-preview">\n\
-					<iframe class="preview" id="preview_' + page.id + '" src="/structr/html/' + page.name + '?edit=2"></iframe>\n\
+					<iframe class="preview" id="preview_' + page.id + '" src="/structr/html/' + page.name + '?edit=4"></iframe>\n\
 					</div><div class="page-name">' + page.name + '</div><div class="clone-page" title="Clone Page"><img src="' + _Pages.clone_icon + '"/></div></div>');
 
 				var tn = $('#page-tn-' + page.id);

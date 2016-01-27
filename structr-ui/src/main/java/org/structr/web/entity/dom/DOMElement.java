@@ -352,16 +352,28 @@ public class DOMElement extends DOMNode implements Element, NamedNodeMap {
 				out.append(" ").append(DOMNode.dataHashProperty.jsonName()).append("=\"").append(getIdHash()).append("\"");
 				break;
 
-//			case APPBUILDER:
-//				
-//				final String area = getProperty(DOMNode.dataStructrAreaProperty);
-//				
-//				if (StringUtils.isNoneBlank(area)) {
-//					
-//					out.append(" ").append(DOMNode.dataStructrAreaProperty.jsonName()).append("=\"").append(area).append("\"");
-//				}
-//
-//				break;
+			case APPBUILDER:
+				
+				if (depth == 0) {
+
+					final String pageId = renderContext.getPageId();
+
+					if (pageId != null) {
+
+						out.append(" data-structr-page=\"").append(pageId).append("\"");
+					}
+				}
+
+				out.append(" data-structr-id=\"").append(getUuid()).append("\"");
+
+				final String area = getProperty(DOMNode.dataStructrAreaProperty);
+				
+				if (StringUtils.isNoneBlank(area)) {
+					
+					out.append(" ").append(DOMNode.dataStructrAreaProperty.jsonName()).append("=\"").append(area).append("\"");
+				}
+
+				break;
 		}
 
 		out.append(">");

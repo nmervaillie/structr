@@ -86,8 +86,9 @@ var _Entities = {
 		var t = $('.props', el);
 
 		// General
-		_Entities.appendRowWithInputField(entity, t, 'data-structr-id', 'Element ID (set to ${this.id})');
-		_Entities.appendRowWithInputField(entity, t, 'data-structr-attr', 'Attribute Key (if set, render input field in edit mode)');
+		_Entities.appendRowWithInputField(entity, t, 'data-structr-area', 'Template area name');
+		_Entities.appendRowWithInputField(entity, t, 'data-structr-id', 'Element ID');
+		_Entities.appendRowWithInputField(entity, t, 'data-structr-attr', 'Attribute key (if set, render input field in edit mode)');
 		_Entities.appendRowWithInputField(entity, t, 'data-structr-type', 'Data type (e.g. Date, Boolean; default: String)');
 		_Entities.appendRowWithInputField(entity, t, 'data-structr-placeholder', 'Placeholder text in edit mode');
 		_Entities.appendRowWithInputField(entity, t, 'data-structr-custom-options-query', 'Custom REST query for value options');
@@ -707,9 +708,6 @@ var _Entities = {
 						$('input[name="_html_' + focusAttr + '"]', props).focus();
 
 						props.append('<tr><td class="key"><input type="text" class="newKey" name="key" data-view="' + view + '"></td><td class="value"><input type="text" value=""></td><td></td></tr>');
-						$('.props tr td.value input', dialog).each(function(i, v) {
-							_Entities.activateInput(v, id);
-						});
 
 						tabView.append('<button class="show-all">Show all attributes</button>');
 						$('.show-all', tabView).on('click', function() {
@@ -717,6 +715,10 @@ var _Entities = {
 							$(this).remove();
 						});
 					}
+
+					$('.props tr td.value input', dialog).each(function(i, v) {
+						_Entities.activateInput(v, id);
+					});
 
 
 				});
