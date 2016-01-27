@@ -46,12 +46,19 @@ var _AppBuilder = {
 	refresh: function(page) {
 		_Pages.clearIframeDroppables();
 
-		var iframe = $('.page-tn').find('#preview_' + page.id);
+		if (!page) {
 		
-		iframe.load(function() {
-			_AppBuilder.zoomIn(page)
-		});
-		iframe.attr('src', iframe.attr('src'));
+			_AppBuilder.zoomOut();
+
+		} else {
+
+			var iframe = $('.page-tn').find('#preview_' + page.id);
+
+			iframe.load(function() {
+				_AppBuilder.zoomIn(page)
+			});
+			iframe.attr('src', iframe.attr('src'));
+		}
 
 	},
 	activateDocShadows: function() {
@@ -272,23 +279,31 @@ var _AppBuilder = {
 		$('#zoom-out').remove();
 		currentPage = undefined;
 		pagesArea.empty();
+		
 		var x=0, y=0, c=3;
 		Command.list('Page', false, 12, 1, 'position', 'asc', null, function(pages) {
 			pages.forEach(function(page) {
 				if (x>c) { x = 0; y++ };
-				pagesArea.append('<div id="page-tn-' + page.id + '" class="page-tn"><div class="page-preview">\n\
-					<iframe class="preview" id="preview_' + page.id + '" src="/structr/html/' + page.name + '?edit=4"></iframe>\n\
-					</div><div class="page-name">' + page.name + '</div><div class="clone-page" title="Clone Page"><img src="' + _Pages.clone_icon + '"/></div></div>');
+				pagesArea.append('<div id="page-tn-' + page.id + '" class="page-tn"><div class="page-preview">'
+					+ '<iframe class="preview" id="preview_' + page.id + '" src="/structr/html/' + page.name + '?edit=4"></iframe>'
+					+ '</div><div class="page-name">' + page.name + '</div>'
+					+ '<div class="icon clone-page" title="Clone Page"><img src="' + _Pages.clone_icon + '"/></div>'
+					+ '<div class="icon delete-page" title="Delete Page"><img src="' + _Pages.delete_icon + '"/></div>'
+					+ '</div>');
 
 				var tn = $('#page-tn-' + page.id);
-				
 				tn.find('.clone-page').on('click', function() {
 					Command.clonePage(page.id, function() {
-						Structr.clearMain();
-						_AppBuilder.init();
+						_AppBuilder.refresh();
 					});
 				});
 				
+				tn.find('.delete-page').on('click', function() {
+					Command.deleteNode(page.id, true, function() {
+						_AppBuilder.refresh();
+					});
+				});
+
 				tn.css({ left: x*300, top: y*300});
 				x++;
 
@@ -304,6 +319,13 @@ var _AppBuilder = {
 					return false;
 				});
 
+			});
+			if (x>c) { x = 0; y++ };
+			pagesArea.append('<div id="add-page-area" class="page-tn"><i class="fa fa-plus"></i></div>');
+			$('#add-page-area').css({ left: x*300, top: y*300}).on('click', function() {
+				Command.create({type: 'Page'}, function(obj) {
+					_AppBuilder.refresh();
+				});
 			});
 		});
 	},

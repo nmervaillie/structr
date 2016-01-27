@@ -176,21 +176,35 @@
     color: #aaa;
 }
 
-#pages-area .page-tn .clone-page {
+/***********************************/
+/* Small icons on page thumbnails  */
+/***********************************/
+
+#pages-area .page-tn .icon {
     position: absolute;
     bottom: 5em;
-    left: 1em;
     display: none;
 }
 
-#pages-area .page-tn:hover .clone-page {
+#pages-area .page-tn:hover .icon {
     display: block;
+    cursor: pointer;
 }
 
-#pages-area .page-tn.zoomed .clone-page,
-#pages-area .page-tn.zoomed:hover .clone-page {
+#pages-area .page-tn.zoomed .icon,
+#pages-area .page-tn.zoomed:hover .icon {
     display: none;
 }
+
+#pages-area .page-tn .clone-page {
+    left: 1em;
+}
+
+#pages-area .page-tn .delete-page {
+    left: 3em;
+}
+
+/***********************************/
 
 .widget-tabs {
     /*overflow: auto;*/
@@ -213,4 +227,29 @@
     border-bottom: .1em solid #aaa ! important;
     border-left: .1em solid #aaa ! important;*/
     border-radius: 0 ! important;
+}
+
+#add-page-area i {
+    font-size: 6em;
+    color: #ccc;
+    width: 4em;
+    height: 4em;
+    display: block;
+    margin-top: 1.5em;
+}
+
+#add-page-area {
+    height: 24em;
+    width: 24em;
+    text-align: center;
+    border: 1px solid #a5a5a5;
+    background-color: #eee;
+}
+
+#add-page-area:hover {
+    background-color: #f3f3f3;
+}
+
+#add-page-area:hover i {
+    color: #aaa;
 }

@@ -250,7 +250,7 @@ var Command = {
 	 * The server will delete the node with the given id and broadcast
 	 * a deletion notification.
 	 */
-	deleteNode: function(id, recursive) {
+	deleteNode: function(id, recursive, callback) {
 		var obj = {};
 		obj.command = 'DELETE';
 		obj.id = id;
@@ -260,7 +260,7 @@ var Command = {
 		}
 		obj.data = data;
 		log('deleteNode()', obj);
-		return sendObj(obj);
+		return sendObj(obj, callback);
 	},
 	/**
 	 * Send a DELETE_RELATIONSHIP command to the server.
