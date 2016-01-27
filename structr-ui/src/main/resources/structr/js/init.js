@@ -294,14 +294,9 @@ var Structr = {
 	refreshUi: function() {
 		showLoadingSpinner();
 
-		if (user) {
-			LSWrapper.setItem(userKey, user);
-		}
 		Structr.clearMain();
-		$('#logout_').html('Logout <span class="username">' + user + '</span>');
 		Structr.loadInitialModule();
 		Structr.startPing();
-		
 		if (!dialogText.text().length) {
 			LSWrapper.removeItem(dialogDataKey);
 		} else {
@@ -312,6 +307,12 @@ var Structr = {
 			}
 		}
 		hideLoadingSpinner();
+	},
+	updateUsername:function(name) {
+		if (name !== user) {
+			user = name;
+			$('#logout_').html('Logout <span class="username">' + name + '</span>');
+		}
 	},
 	startPing: function() {
 		log('Starting PING');
@@ -381,7 +382,6 @@ var Structr = {
 			data.password = password;
 			obj.data = data;
 			if (sendObj(obj)) {
-				user = username;
 				return true;
 			}
 			return false;
@@ -397,7 +397,6 @@ var Structr = {
 		data.username = user;
 		obj.data = data;
 		if (sendObj(obj)) {
-			LSWrapper.removeItem(userKey);
 			$.cookie('JSESSIONID', null);
 			sessionId.length = 0;
 			Structr.clearMain();
@@ -408,9 +407,9 @@ var Structr = {
 		return false;
 	},
 	loadInitialModule: function(isLogin) {
-		
+
 		Structr.restoreLocalStorage(function() {
-			
+
 			var browserUrl = window.location.href;
 			var anchor = getAnchorFromUrl(browserUrl);
 			lastMenuEntry = ((!isLogin && anchor && anchor !== 'logout') ? anchor : LSWrapper.getItem(lastMenuEntryKey));
@@ -431,7 +430,7 @@ var Structr = {
 			}
 			Structr.updateVersionInfo();
 		});
-		
+
 	},
 	clearMain: function() {
 		var newDroppables = new Array();
