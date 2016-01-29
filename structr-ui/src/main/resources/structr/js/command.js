@@ -135,12 +135,13 @@ var Command = {
 	 *
 	 * The optional callback function will be executed with the complete result set as parameter.
 	 */
-	query: function(type, pageSize, page, sort, order, properties, callback) {
+	query: function(type, pageSize, page, sort, order, properties, callback, exact) {
 		var obj = {};
 		obj.command = 'QUERY';
 		var data = {};
 		data.type = type;
 		if (properties) data.properties = JSON.stringify(properties);
+		if (exact != null) data.exact = exact;
 		obj.pageSize = pageSize;
 		obj.page = page;
 		obj.sort = sort;

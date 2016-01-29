@@ -392,13 +392,7 @@ function wsConnect() {
 
 				log('LIST', result, data);
 
-				rawResultCount[type] = data.rawResultCount;
-				pageCount[type] = Math.max(1, Math.ceil(rawResultCount[type] / pageSize[type]));
-				Structr.updatePager(type, dialog.is(':visible') ? dialog : undefined);
-
-				$('.pageCount', $('.pager' + type)).val(pageCount[type]);
-
-				StructrModel.callCallback(data.callback, result);
+				StructrModel.callCallback(data.callback, result, data.rawResultCount);
 //				$(result).each(function (i, entity) {
 //					StructrModel.callCallback(data.callback, entity, result.length);
 //				});
@@ -409,7 +403,7 @@ function wsConnect() {
 
 				log('QUERY', result, data);
 
-				StructrModel.callCallback(data.callback, result);
+				StructrModel.callCallback(data.callback, result, data.rawResultCount);
 				StructrModel.clearCallback(data.callback);
 
 			} else if (command === 'DELETE') { /*********************** DELETE ************************/

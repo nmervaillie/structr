@@ -462,7 +462,7 @@ function getElementDisplayName(entity) {
 		return '(blank name)';
 	}
 	return entity.name;
-} 
+}
 
 jQuery.isBlank = function (obj) {
 	if (!obj || $.trim(obj) === "") return true;
@@ -483,15 +483,15 @@ var LSWrapper = {
 	setItem: function(key, value) {
 		localStorageObject[key] = value;
 	},
-	
+
 	getItem: function (key) {
 		return localStorageObject[key] || null;
 	},
-	
+
 	removeItem: function (key) {
 		delete localStorageObject[key];
 	},
-	
+
 	clear: function () {
 		localStorageObject = {};
 	}
@@ -502,6 +502,6 @@ function fastRemoveAllChildren(el) {
 	if (!el) return;
 	var child;
 	while ((child = el.firstChild)) {
-	  el.removeChild(child);
-	}	
+		el.removeChild(child);
+	}
 }
