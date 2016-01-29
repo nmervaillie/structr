@@ -134,6 +134,7 @@
     padding: 1em 1em 0 1em;
     border: .1em solid #ccc;
     box-shadow: 0 0 .5em #eee;
+    background-color: #fff;
 }
 
 .widget-preview:hover {
@@ -264,4 +265,9 @@
     width: 100%;
     height: 100%;
     border: none;
+}
+
+.ui-tabs-panel .elementGroup {
+    clear: both;
+    overflow: hidden;
 }

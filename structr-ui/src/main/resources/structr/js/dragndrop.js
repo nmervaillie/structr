@@ -309,7 +309,7 @@ var _Dragndrop = {
 		log('drop event in appendElementElement', pageId, Structr.getId(self), (tag !== 'content' ? tag : ''));
 
 	},
-	htmlElementFromPaletteDropped: function(tag, target, pageId) {
+	htmlElementFromPaletteDropped: function(tag, target, pageId, callback) {
 		var nodeData = {};
 		if (tag === 'a' || tag === 'p'
 				|| tag === 'h1' || tag === 'h2' || tag === 'h3' || tag === 'h4' || tag === 'h5' || tag === 'h5' || tag === 'pre' || tag === 'label' || tag === 'option'
@@ -331,7 +331,7 @@ var _Dragndrop = {
 			log('wrap content', pageId, target.id, tag);
 			Command.wrapContent(pageId, target.id, tag);
 		} else {
-			Command.createAndAppendDOMNode(pageId, target.id, tag !== 'content' ? tag : '', nodeData);
+			Command.createAndAppendDOMNode(pageId, target.id, tag !== 'content' ? tag : '', nodeData, callback);
 		}
 		return false;
 	},

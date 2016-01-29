@@ -594,7 +594,7 @@ var Command = {
 	 * will create a content (#text) node.
 	 *
 	 */
-	createAndAppendDOMNode: function(pageId, parentId, tagName, attributes) {
+	createAndAppendDOMNode: function(pageId, parentId, tagName, attributes, callback) {
 		var obj = {};
 		obj.command = 'CREATE_AND_APPEND_DOM_NODE';
 		obj.pageId = pageId;
@@ -606,7 +606,7 @@ var Command = {
 		});
 		obj.data = data;
 		log('createAndAppendDOMNode()', obj);
-		return sendObj(obj);
+		return sendObj(obj, callback);
 	},
 	wrapContent: function(pageId, parentId, tagName) {
 		var obj = {};

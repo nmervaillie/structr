@@ -807,13 +807,13 @@ var _Pages = {
 
 				$(el).on({
 					mouseover: function(e) {
-						e.stopPropagation();
+						//e.stopPropagation();
 						var self = $(this);
 						self.addClass('structr-editable-area');
 						_Pages.highlight(self.attr('data-structr-id'));
 					},
 					mouseout: function(e) {
-						e.stopPropagation();
+						//e.stopPropagation();
 						var self = $(this);
 						self.removeClass('structr-editable-area');
 						_Pages.unhighlight(self.attr('data-structr-id'));

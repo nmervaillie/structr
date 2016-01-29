@@ -34,13 +34,12 @@ var _AppBuilder = {
 	autoRefresh: [],
 	init: function() {
 
-		_Pages.clearIframeDroppables();
 		main.append('<div id="app-builder"><div id="pages-area"></div><div id="widgets-area"></div></div>');
 		pagesArea = $('#pages-area');
 		widgetsArea = $('#widgets-area');
 		statusArea = $('#status-info');
 
-		_AppBuilder.zoomOut();
+		_AppBuilder.refresh();
 
 	},
 	refresh: function(page) {
@@ -51,19 +50,21 @@ var _AppBuilder = {
 
 		} else {
 			var iframe = $('.page-tn').find('#app-preview_' + page.id);
-			iframe.load(function() {
-				_AppBuilder.zoomIn(page)
-			});
+//			iframe.load(function() {
+//				_AppBuilder.zoomIn(page)
+//			});
 			iframe.attr('src', iframe.attr('src'));
 		}
 	},
-	activateDocShadows: function() {
-		var iframe = $('.page-tn').find('#app-preview_' + currentPage.id);
-		var doc = iframe.contents();
+	activateDocShadows: function(doc) {
+		//var iframe = $('.page-tn').find('#app-preview_' + currentPage.id);
+		//var doc = iframe.contents();
+		if (!doc)
+			return;
 		doc.find('body').addClass('active-shadows');
 	},
 	zoomOut: function() {
-		fastRemoveAllChildren(widgetsArea[0]);
+		widgetsArea.hide();
 		_Pages.clearIframeDroppables();
 
 		$('#zoom-out').remove();
@@ -79,11 +80,11 @@ var _AppBuilder = {
 				}
 				;
 				pagesArea.append('<div id="page-tn-' + page.id + '" class="page-tn"><div class="page-preview">'
-					+ '<iframe class="preview" id="app-preview_' + page.id + '"></iframe>'
-					+ '</div><div class="page-name">' + page.name + '</div>'
-					+ '<div class="icon clone-page" title="Clone Page"><img src="' + _Pages.clone_icon + '"/></div>'
-					+ '<div class="icon delete-page" title="Delete Page"><img src="' + _Pages.delete_icon + '"/></div>'
-					+ '</div>');
+						+ '<iframe class="preview" id="app-preview_' + page.id + '"></iframe>'
+						+ '</div><div class="page-name">' + page.name + '</div>'
+						+ '<div class="icon clone-page" title="Clone Page"><img src="' + _Pages.clone_icon + '"/></div>'
+						+ '<div class="icon delete-page" title="Delete Page"><img src="' + _Pages.delete_icon + '"/></div>'
+						+ '</div>');
 
 				var tn = $('#page-tn-' + page.id);
 				tn.find('.clone-page').on('click', function() {
@@ -130,6 +131,7 @@ var _AppBuilder = {
 		});
 	},
 	zoomIn: function(page) {
+
 		currentPage = page;
 		$('.page-tn').not('#page-tn-' + page.id).hide();
 		$('.page-tn').off('click');
@@ -141,14 +143,11 @@ var _AppBuilder = {
 		var iframe = $('.page-tn').find('#app-preview_' + page.id);
 		var doc = iframe.contents();
 
-		doc.off('click');
-		_AppBuilder.activateDocShadows();
+		doc.off('click').off('mouseenter').off('mouseleave');
 
 		doc.on('mouseenter', function() {
 			doc.find('body').addClass('active-shadows');
-		});
-
-		doc.on('mouseleave', function() {
+		}).on('mouseleave', function() {
 			doc.find('body').removeClass('active-shadows');
 		});
 
@@ -171,6 +170,8 @@ var _AppBuilder = {
 			height: windowHeight - headerOffsetHeight + px(pagesArea, 2)
 		});
 
+		widgetsArea.show();
+
 	},
 	activateAreas: function(page) {
 		$('#app-preview_' + page.id).load(function() {
@@ -180,29 +181,30 @@ var _AppBuilder = {
 			if (head) {
 				head.append('<link rel="stylesheet" type="text/css" href="/structr/css/lib/font-awesome.min.css">');
 				head.append('<style media="screen" type="text/css">'
-					+ '* { z-index: 0}\n'
-					+ 'body.active-shadows [data-structr-area] { position: relative ! important; -moz-box-shadow: 0 0 .1em #ccc ! important; -webkit-box-shadow: 0 0 .1em #ccc ! important; box-shadow: 0 0 .1em #ccc ! important; }\n'
-					+ 'body.active-shadows [data-structr-area] > * { -moz-box-shadow: 0 0 .1em #ccc ! important; -webkit-box-shadow: 0 0 .1em #ccc ! important; box-shadow: 0 0 .1em #ccc ! important; }\n'
-					+ 'body.active-shadows [data-structr-area]:hover { opacity: .8 ! important; -moz-box-shadow: 0 0 .1em #000 ! important; -webkit-box-shadow: 0 0 .1em #000 ! important; box-shadow: 0 0 .1em #000 ! important; }\n'
-					+ 'body.active-shadows [data-structr-area].widget-hover { opacity: .8 ! important; }\n'
-					+ 'body.active-shadows .button-area { z-index: 99 ! important; position: absolute ! important; color: #555 ! important; line-height: 1.85em ! important; width: 8em ! important; padding: 0 ! important; margin: 0 ! important; }\n'
-					+ 'body.active-shadows .button-area button { important; width: 2em ! important; border-radius: .2em ! important; border: 1px solid #aaa ! important; padding: 0 ! important; margin: 0 ! important; text-align: center ! important; text-shadow: 0 1px 0 #fff ! important; }\n'
-					+ 'body.active-shadows .button-area button:hover { background-color: #eee; text-shadow: none ! important; }\n'
-					+ '.structr-editable-area { background-color: #ffe; -moz-box-shadow: 0 0 5px #888; -webkit-box-shadow: 0 0 5px yellow; box-shadow: 0 0 5px #888; }\n'
-					+ '.structr-editable-area-active { background-color: #ffe; border: 1px solid orange ! important; color: #333; }\n'
-					//+ '[data-structr-area]:hover { background-color: #ffe; border: 1px solid orange ! important; color: #333; }\n'
-					/**
-					 * Fix for bug in Chrome preventing the modal dialog background
-					 * from being displayed if a page is shown in the preview which has the
-					 * transform3d rule activated.
-					 */
-					+ '.navbar-fixed-top { -webkit-transform: none ! important; }\n'
-					+ '</style>');
+						+ '* { z-index: 0}\n'
+						+ 'body.active-shadows [data-structr-area] { position: relative ! important; -moz-box-shadow: 0 0 .1em #ccc ! important; -webkit-box-shadow: 0 0 .1em #ccc ! important; box-shadow: 0 0 .1em #ccc ! important; }\n'
+						+ 'body.active-shadows [data-structr-area] > * { -moz-box-shadow: 0 0 .1em #ccc ! important; -webkit-box-shadow: 0 0 .1em #ccc ! important; box-shadow: 0 0 .1em #ccc ! important; }\n'
+						+ 'body.active-shadows [data-structr-area]:hover, .widget-hover { min-height: 100px; opacity: .8 ! important; -moz-box-shadow: 0 0 .1em #000 ! important; -webkit-box-shadow: 0 0 .1em #000 ! important; box-shadow: 0 0 .1em #000 ! important; }\n'
+						+ 'body.active-shadows .button-area {  -moz-box-shadow: none ! important; -webkit-box-shadow: none ! important; box-shadow: none ! important; z-index: 99 ! important; position: absolute ! important; color: #555 ! important; line-height: 1.85em ! important; width: 8em ! important; padding: 0 ! important; margin: 0 ! important; }\n'
+						+ 'body.active-shadows .button-area button { float: right; width: 2em; border-radius: .2em; border: 1px solid #aaa; padding: 0; margin: 0; text-align: center; text-shadow: 0 1px 0 #fff; }\n'
+						+ 'body.active-shadows .button-area button:hover { background-color: #eee; text-shadow: none; }\n'
+						+ '.structr-editable-area { background-color: #ffe; -moz-box-shadow: 0 0 5px #888; -webkit-box-shadow: 0 0 5px yellow; box-shadow: 0 0 5px #888; }\n'
+						+ '.structr-editable-area-active { background-color: #ffe; border: 1px solid orange ! important; color: #333; }\n'
+						//+ '[data-structr-area]:hover { background-color: #ffe; border: 1px solid orange ! important; color: #333; }\n'
+						/**
+						 * Fix for bug in Chrome preventing the modal dialog background
+						 * from being displayed if a page is shown in the preview which has the
+						 * transform3d rule activated.
+						 */
+						+ '.navbar-fixed-top { -webkit-transform: none ! important; }\n'
+						+ '</style>');
 			}
 
 			_Pages.activateComments(doc, function() {
 				_AppBuilder.refresh(currentPage);
 			});
+
+			_AppBuilder.activateDocShadows(doc);
 
 			doc.find('*').each(function(i, element) {
 
@@ -210,7 +212,7 @@ var _AppBuilder = {
 					var area = $(el);
 
 					var children = area.children();
-
+	
 					if (children.size() === 0) {
 						area.css({minHeight: 100});
 					} else {
@@ -219,12 +221,11 @@ var _AppBuilder = {
 							_AppBuilder.bindActions(c, area);
 						});
 					}
-					;
 
 					area.droppable({
 						iframeFix: true,
 						iframe: iframe,
-						accept: '.widget-preview',
+						accept: '.widget-preview, .element',
 						greedy: true,
 						hoverClass: 'widget-hover',
 						drop: function(e, ui) {
@@ -234,7 +235,27 @@ var _AppBuilder = {
 							var sourceId = $(ui.draggable).attr('id').substr('widget-preview-'.length);
 							var targetId = $(this).attr('data-structr-id');
 
-							//console.log(sourceId, targetId);
+							console.log('sourceId', sourceId);
+							console.log('targetId', targetId);
+
+							var tag;
+							if (!sourceId) {
+								
+								var d = $(ui.draggable);
+								tag = d.text();
+								if (d.attr('subkey')) {
+									related = {};
+									related.subKey = d.attr('subkey');
+									related.isCollection = (d.attr('collection') === 'true');
+								}
+
+								Command.get(targetId, function(target) {
+									_Dragndrop.htmlElementFromPaletteDropped(tag, target, page.id, function() {
+										_AppBuilder.refresh(currentPage);
+									});
+								});
+
+							}
 
 							var source = StructrModel.obj(sourceId);
 							var target = StructrModel.obj(targetId);
@@ -245,7 +266,6 @@ var _AppBuilder = {
 								Command.get(targetId, function(target) {
 									_Dragndrop.widgetDropped(source, target, page.id, function() {
 										_AppBuilder.refresh(currentPage);
-										//_AppBuilder.loadWidgets();
 									});
 								});
 							} else if (source && target) {
@@ -253,7 +273,6 @@ var _AppBuilder = {
 								// objects are already stored in model
 								_Dragndrop.widgetDropped(source, target, page.id, function() {
 									_AppBuilder.refresh(currentPage);
-									//_AppBuilder.loadWidgets();
 								});
 
 							} else {
@@ -263,7 +282,6 @@ var _AppBuilder = {
 									Command.get(targetId, function(target) {
 										_Dragndrop.widgetDropped(source, target, page.id, function() {
 											_AppBuilder.refresh(currentPage);
-											//_AppBuilder.loadWidgets();
 										});
 									});
 								});
@@ -287,8 +305,22 @@ var _AppBuilder = {
 
 			var buttonArea = $('.button-area', area);
 			if (buttonArea.size() === 0) {
-				area.append('<div class="button-area"><button class="up-button"><i class="fa fa-arrow-up"></i></button><button class="down-button"><i class="fa fa-arrow-down"></i></button><button class="edit-button"><i class="fa fa-cog"></i></button><button class="remove-button"><i class="fa fa-trash"></i></button></div>');
+				var isFirst = c.is(':first');
+				var isLast = c.is(':last');
+				var hasSiblings = c.parent().children().length > 1;
+
+				area.append('<div class="button-area"><button class="edit-button"><i class="fa fa-cog"></i></button><button class="remove-button"><i class="fa fa-trash"></i></button></div>');
 				buttonArea = $('.button-area', area);
+
+				if (hasSiblings) {
+					if (!isFirst) {
+						buttonArea.prepend('<button class="up-button"><i class="fa fa-arrow-up"></i></button>');
+					}
+
+					if (!isLast) {
+						buttonArea.prepend('<button class="down-button"><i class="fa fa-arrow-down"></i></button>');
+					}
+				}
 			}
 
 			buttonArea.css({
@@ -313,9 +345,7 @@ var _AppBuilder = {
 				var parentId = area.attr('data-structr-id');
 				Command.removeSourceFromTarget(id, parentId, function(obj, size, command) {
 					if (command === 'REMOVE_CHILD') {
-						console.log(obj, size, command)
 						_AppBuilder.refresh(currentPage);
-						//_AppBuilder.loadWidgets();
 					}
 				});
 				return false;
@@ -393,28 +423,60 @@ var _AppBuilder = {
 			}
 		});
 
+		var key = 'html-palette';
+		ul.append('<li><a href="#widget-tab-area-' + key + '">' + key + '</a></li>');
+		tabs.append('<div id="widget-tab-area-' + key + '"></div>');
+		var tabArea = $('#widget-tab-area-' + key);
+
+		{
+			$(_Elements.elementGroups).each(function(i, group) {
+				log(group);
+				tabArea.append('<div class="elementGroup" id="group_' + group.name + '"><h3>' + group.name + '</h3></div>');
+				$(group.elements).each(function(j, elem) {
+					var div = $('#group_' + group.name);
+					div.append('<div class="draggable element" id="add_' + elem + '">' + elem + '</div>');
+					$('#add_' + elem, div).draggable({
+						iframeFix: true,
+						revert: 'invalid',
+						containment: 'body',
+						helper: 'clone',
+						appendTo: '#main',
+						//stack: '.node',
+						zIndex: 99,
+						activeClass: 'widget-hover'
+					});
+				});
+			});
+			_AppBuilder.resize();
+		}
+
 		_AppBuilder.appendWidgetLib(widgetGroups, function() {
 
 			Object.keys(widgetGroups).forEach(function(key) {
-
 				ul.append('<li><a href="#widget-tab-area-' + key + '">' + key + '</a></li>');
 				tabs.append('<div id="widget-tab-area-' + key + '"></div>');
-				var tabArea = $('#widget-tab-area-' + key);
-
-				widgetGroups[key].forEach(function(widget) {
-					StructrModel.create(widget, null, false);
-					_AppBuilder.appendWidget(widget, tabArea);
-				});
 			});
 
 			$('.widget-tabs').tabs({
 				activate: function(e, ui) {
 					//console.log(ui.newTab.text());
-					var tabName = clean(ui.newTab.text());
-					if (widgetGroups[tabName]) {
-						_AppBuilder.activateWidgets(widgetGroups[tabName]);
+					var key = clean(ui.newTab.text());
+					var tabArea = $('#widget-tab-area-' + key);
+
+					if (widgetGroups[key] && widgetGroups[key].length) {
+
+						fastRemoveAllChildren(tabArea[0]);
+
+						widgetGroups[key].forEach(function(widget) {
+							StructrModel.create(widget, null, false);
+							_AppBuilder.appendWidget(widget, tabArea);
+						});
+						if (widgetGroups[key]) {
+							_AppBuilder.activateWidgets(widgetGroups[key]);
+						}
+
 					}
-					LSWrapper.setItem(appBuilderActiveWidgetTabRightKey, tabName);
+					LSWrapper.setItem(appBuilderActiveWidgetTabRightKey, key);
 				}
 			});
 
@@ -427,6 +489,8 @@ var _AppBuilder = {
 
 	},
 	appendWidgetLib: function(groups, callback) {
+		callback();
+		return;
 
 		var key = 'bootstrap', url = 'http://getbootstrap.com/components/', cls = '.bs-example';
 
@@ -487,6 +551,7 @@ var _AppBuilder = {
 //				left: 120,
 //				top: 60
 //			},
+			activeClass: 'widget-hover',
 			containment: 'body',
 			start: function(e, ui) {
 				$(ui.helper).css({
@@ -527,32 +592,22 @@ var _AppBuilder = {
 			}
 
 			doc.find('body').append(widget.source);
+			var firstEl = doc.find('body').children().first();
+			firstEl.css({overflow: 'hidden'});
 
 			window.setTimeout(function() {
-				var firstEl = doc.find('body').children().first();
-
-				//console.log(firstEl.css('height'), firstEl.css('paddingTop'), firstEl.css('paddingBottom'), firstEl.css('marginTop'), firstEl.css('marginBottom'), firstEl.innerHeight(), firstEl.outerHeight());
-				var h = parseInt(firstEl.innerHeight()) + parseInt(firstEl.css('paddingTop')) + parseInt(firstEl.css('paddingBottom')) + parseInt(firstEl.css('marginTop')) + parseInt(firstEl.css('marginBottom'));
-				//console.log(h);
-				//console.log(firstEl.css('height'), firstEl.width(), firstEl.height(), firstEl.outerWidth(), firstEl.outerHeight(), iframe.width(), iframe.height());
-
 				css = {
 					//width: Math.min(widget.previewWidth, firstEl.outerWidth()),
 					width: firstEl.outerWidth(),
-					//height: Math.min(widget.previewHeight, firstEl.outerHeight()),
 					height: firstEl.outerHeight(),
 					overflow: 'hidden',
 					cursor: 'move',
 					display: 'block'
 				};
-
 				iframe.css(css);
-
 				previewBox.show();
-
 				_AppBuilder.resize();
-
-			}, 500);
+			}, 100);
 		});
 	},
 	resize: function(offsetLeft, offsetRight) {
