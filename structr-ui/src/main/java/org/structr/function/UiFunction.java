@@ -24,6 +24,7 @@ import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
+import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.httpclient.params.HttpClientParams;
@@ -44,6 +45,8 @@ public abstract class UiFunction extends Function<Object, Object> {
 	protected String getFromUrl(final ActionContext ctx, final String requestUrl, final String username, final String password) throws IOException {
 
 		final HttpClientParams params = new HttpClientParams(HttpClientParams.getDefaultParams());
+		params.setCookiePolicy(CookiePolicy.BROWSER_COMPATIBILITY);
+
 		final HttpClient client = new HttpClient(params);
 		final GetMethod getMethod = new GetMethod(requestUrl);
 
@@ -72,6 +75,8 @@ public abstract class UiFunction extends Function<Object, Object> {
 	protected GraphObjectMap headFromUrl(final ActionContext ctx, final String requestUrl, final String username, final String password) throws IOException, FrameworkException {
 
 		final HttpClientParams params = new HttpClientParams(HttpClientParams.getDefaultParams());
+		params.setCookiePolicy(CookiePolicy.BROWSER_COMPATIBILITY);
+
 		final HttpClient client = new HttpClient(params);
 		final HeadMethod headMethod = new HeadMethod(requestUrl);
 
