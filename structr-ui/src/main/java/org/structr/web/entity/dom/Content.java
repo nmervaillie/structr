@@ -336,7 +336,9 @@ public class Content extends DOMNode implements Text {
 
 			}
 
-			if (EditMode.CONTENT.equals(edit) && inBody && this.isGranted(Permission.write, securityContext)) {
+			final boolean contentEditingAllowed = EditMode.CONTENT.equals(edit) || EditMode.APPBUILDER.equals(edit);
+			
+			if (contentEditingAllowed && inBody && this.isGranted(Permission.write, securityContext)) {
 
 				if ("text/javascript".equals(_contentType)) {
 
@@ -402,14 +404,14 @@ public class Content extends DOMNode implements Text {
 				//buffer.append(indent(depth, true)).append(_content);
 
 				// insert whitespace to make element clickable
-				if (EditMode.CONTENT.equals(edit) && _content.length() == 0) {
+				if (contentEditingAllowed && _content.length() == 0) {
 					_content = "--- empty ---";
 				}
 
 				out.append(_content);
 			}
 
-			if (EditMode.CONTENT.equals(edit) && inBody && !("text/javascript".equals(getProperty(contentType))) && !("text/css".equals(getProperty(contentType)))) {
+			if (contentEditingAllowed && inBody && !("text/javascript".equals(getProperty(contentType))) && !("text/css".equals(getProperty(contentType)))) {
 
 	//			buffer.append("</span>");
 				out.append("<!---->");

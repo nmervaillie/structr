@@ -975,6 +975,8 @@ public class HtmlServlet extends HttpServlet implements HttpServiceServlet {
 	 */
 	private Page findPage(final SecurityContext securityContext, List<Page> pages, final String path, final EditMode edit) throws FrameworkException {
 
+		final boolean contentEditingAllowed = EditMode.CONTENT.equals(edit) || EditMode.APPBUILDER.equals(edit);
+		
 		if (pages == null) {
 			pages = StructrApp.getInstance(securityContext).nodeQuery(Page.class).getAsList();
 			Collections.sort(pages, new GraphObjectComparator(Page.position, GraphObjectComparator.ASCENDING));
@@ -985,7 +987,7 @@ public class HtmlServlet extends HttpServlet implements HttpServiceServlet {
 			final String pagePath = page.getPath();
 			final String name     = PathHelper.getName(path);
 
-			if (((pagePath != null && pagePath.equals(path)) || name.equals(page.getName()) || name.equals(page.getUuid()) ) && (EditMode.CONTENT.equals(edit) || isVisibleForSite(securityContext.getRequest(), page))) {
+			if (((pagePath != null && pagePath.equals(path)) || name.equals(page.getName()) || name.equals(page.getUuid()) ) && (contentEditingAllowed || isVisibleForSite(securityContext.getRequest(), page))) {
 				return page;
 			}
 		}
@@ -1005,6 +1007,8 @@ public class HtmlServlet extends HttpServlet implements HttpServiceServlet {
 	 */
 	private Page findIndexPage(final SecurityContext securityContext, List<Page> pages, final EditMode edit) throws FrameworkException {
 
+		final boolean contentEditingAllowed = EditMode.CONTENT.equals(edit) || EditMode.APPBUILDER.equals(edit);
+		
 		if (pages == null) {
 			pages = StructrApp.getInstance(securityContext).nodeQuery(Page.class).getAsList();
 			Collections.sort(pages, new GraphObjectComparator(Page.position, GraphObjectComparator.ASCENDING));
@@ -1012,7 +1016,7 @@ public class HtmlServlet extends HttpServlet implements HttpServiceServlet {
 
 		for (Page page : pages) {
 			
-			if (page.getProperty(Page.position) != null && ((page.getProperty(Page.enableBasicAuth) != null && page.getProperty(Page.visibleToAuthenticatedUsers)) ||  securityContext.isVisible(page) || (EditMode.CONTENT.equals(edit) || isVisibleForSite(securityContext.getRequest(), page)))) {
+			if (page.getProperty(Page.position) != null && ((page.getProperty(Page.enableBasicAuth) != null && page.getProperty(Page.visibleToAuthenticatedUsers)) ||  securityContext.isVisible(page) || (contentEditingAllowed || isVisibleForSite(securityContext.getRequest(), page)))) {
 				
 				return page;
 			}
