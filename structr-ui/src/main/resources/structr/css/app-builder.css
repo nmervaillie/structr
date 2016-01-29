@@ -253,3 +253,15 @@
 #add-page-area:hover i {
     color: #aaa;
 }
+
+.widget-lib {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.widget-lib iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}

@@ -419,7 +419,11 @@ var _Dragndrop = {
 
 						//console.log(source.source, elementId, pageId, attrs);
 						e.stopPropagation();
-						Command.appendWidget(text, target.id, pageId, widgetsUrl, attrs);
+						Command.appendWidget(text, target.id, pageId, widgetsUrl, attrs, function() {
+							if (callback) {
+								callback();
+							}
+						});
 
 						dialogCancelButton.click();
 						return false;
