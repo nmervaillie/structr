@@ -139,7 +139,6 @@ function wsConnect() {
 
 			if (command === 'LOGIN' || code === 100) { /*********************** LOGIN or response to PING ************************/
 
-				log('user, oldUser', user);
 				me = data.data;
 				_Dashboard.checkAdmin();
 				isAdmin = data.data.isAdmin;
@@ -169,7 +168,9 @@ function wsConnect() {
 
 			} else if (command === 'GET_LOCAL_STORAGE') { /*********************** GET_LOCAL_STORAGE ************************/
 
-				localStorageObject = JSON.parse(data.data.localStorageString);
+				if (data.data.localStorageString && data.data.localStorageString.length) {
+					localStorageObject = JSON.parse(data.data.localStorageString);
+				}
 
 				StructrModel.callCallback(data.callback, data.data[data.data['key']]);
 				StructrModel.clearCallback(data.callback);
@@ -386,13 +387,7 @@ function wsConnect() {
 
 				log('LIST', result, data);
 
-				rawResultCount[type] = data.rawResultCount;
-				pageCount[type] = Math.max(1, Math.ceil(rawResultCount[type] / pageSize[type]));
-				Structr.updatePager(type, dialog.is(':visible') ? dialog : undefined);
-
-				$('.pageCount', $('.pager' + type)).val(pageCount[type]);
-
-				StructrModel.callCallback(data.callback, result);
+				StructrModel.callCallback(data.callback, result, data.rawResultCount);
 //				$(result).each(function (i, entity) {
 //					StructrModel.callCallback(data.callback, entity, result.length);
 //				});
@@ -403,7 +398,7 @@ function wsConnect() {
 
 				log('QUERY', result, data);
 
-				StructrModel.callCallback(data.callback, result);
+				StructrModel.callCallback(data.callback, result, data.rawResultCount);
 				StructrModel.clearCallback(data.callback);
 
 			} else if (command === 'DELETE') { /*********************** DELETE ************************/
