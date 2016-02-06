@@ -18,6 +18,9 @@
  */
 package org.structr.api;
 
+import java.util.Set;
+import org.structr.api.graph.PropertyContainer;
+
 /**
  *
  */
@@ -28,4 +31,6 @@ public interface Transaction extends AutoCloseable {
 
 	@Override
 	void close();
+	
+	Set<PropertyContainer> getModifiedEntites();
 }

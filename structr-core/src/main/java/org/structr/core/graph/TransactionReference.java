@@ -18,7 +18,9 @@
  */
 package org.structr.core.graph;
 
+import java.util.Set;
 import org.structr.api.Transaction;
+import org.structr.api.graph.PropertyContainer;
 import org.structr.core.TransactionSource;
 
 /**
@@ -63,7 +65,7 @@ public class TransactionReference implements Transaction {
 	public TransactionSource getSource() {
 		return source;
 	}
-
+	
 	// ----- interface Transaction -----
 	@Override
 	public void failure() {
@@ -90,5 +92,10 @@ public class TransactionReference implements Transaction {
 
 			tx.close();
 		}
+	}
+
+	@Override
+	public Set<PropertyContainer> getModifiedEntites() {
+		return tx.getModifiedEntites();
 	}
 }

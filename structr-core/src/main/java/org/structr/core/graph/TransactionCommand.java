@@ -94,6 +94,10 @@ public class TransactionCommand extends NodeServiceCommand implements AutoClosea
 		final TransactionReference tx = transactions.get();
 		if (tx != null && tx.isToplevel()) {
 
+			if (securityContext != null) {
+				securityContext.setTx(tx);
+			}
+			
 			final ModificationQueue modificationQueue = queues.get();
 			final ErrorBuffer errorBuffer             = buffers.get();
 

@@ -41,6 +41,7 @@ import org.structr.core.entity.AbstractNode;
 import org.structr.core.entity.Principal;
 import org.structr.core.entity.SuperUser;
 import org.structr.core.graph.NodeInterface;
+import org.structr.core.graph.TransactionReference;
 import org.structr.schema.SchemaHelper;
 
 /**
@@ -71,6 +72,8 @@ public class SecurityContext {
 	private Set<String> customView               = null;
 	private String cachedUserName                = null;
 	private String cachedUserId                  = null;
+	
+	private TransactionReference tx;
 
 	//~--- constructors ---------------------------------------------------
 	private SecurityContext() {
@@ -713,6 +716,14 @@ public class SecurityContext {
 		dontModifyAccessTime = true;
 	}
 
+	public void setTx(final TransactionReference tx) {
+		this.tx = tx;
+	}
+	
+	public TransactionReference getTx() {
+		return this.tx;
+	}
+	
 	// ----- nested classes -----
 	private static class SuperUserSecurityContext extends SecurityContext {
 

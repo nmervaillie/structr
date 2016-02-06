@@ -19,10 +19,12 @@
 package org.structr.core.graph;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -34,6 +36,7 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.structr.api.QueryResult;
+import org.structr.api.graph.PropertyContainer;
 import org.structr.api.graph.Relationship;
 import org.structr.common.FactoryDefinition;
 import org.structr.common.SecurityContext;
@@ -43,6 +46,7 @@ import org.structr.core.Adapter;
 import org.structr.core.GraphObject;
 import org.structr.core.Result;
 import org.structr.core.app.StructrApp;
+import org.structr.neo4j.wrapper.NodeWrapper;
 import org.structr.schema.SchemaHelper;
 
 public abstract class Factory<S, T extends GraphObject> implements Adapter<S, T>, Function<S, T> {
@@ -349,7 +353,10 @@ public abstract class Factory<S, T extends GraphObject> implements Adapter<S, T>
 		final AtomicInteger processedItems = new AtomicInteger();
 
 		final List<Item<T>> nodes = new LinkedList<>();
+		final Set<Long> queryIds  = new HashSet<>();
 
+		Set<PropertyContainer> modifiedEntities = Collections.EMPTY_SET;
+		
 		try (final QueryResult<S> closeable = input) {
 
 			final SecurityContext securityContext      = factoryProfile.getSecurityContext();
@@ -359,9 +366,17 @@ public abstract class Factory<S, T extends GraphObject> implements Adapter<S, T>
 			int threadCount                            = 1;
 			int rawCount                               = 0;
 
+			
+			final TransactionReference txRef = securityContext.getTx();
+			if (txRef != null) {
+
+				modifiedEntities = txRef.getModifiedEntites();
+			}			
+			
 			// fill queue with data and count elements
 			for (final S item : closeable) {
 				queue.add(new Item<>(rawCount++, item));
+				queryIds.add(((PropertyContainer) item).getId());
 			}
 
 			if (rawCount < 100) {
@@ -425,6 +440,25 @@ public abstract class Factory<S, T extends GraphObject> implements Adapter<S, T>
 		for (final Item<T> item : nodes.subList(from, to)) {
 			output.add(item.item);
 		}
+		
+		modifiedEntities.stream().forEach((entity) -> {
+			System.out.println(entity);
+
+			if (queryIds.contains(entity.getId()) && entity instanceof NodeWrapper) {
+				
+				T obj = (T) instantiate((S) entity);
+				if (obj != null) {
+					
+					if (output.contains(obj)) {
+						output.remove(obj);
+					}
+					
+					output.add(obj);
+				}
+			}
+
+		});
+				
 
 		// The overall count may be inaccurate
 		return new Result(output, overallCount.get(), true, false);
@@ -460,7 +494,7 @@ public abstract class Factory<S, T extends GraphObject> implements Adapter<S, T>
 		public void run() {
 
 			try (final Tx tx = StructrApp.getInstance(securityContext).tx()) {
-
+				
 				// transaction is only needed if we are running multiple threads
 				doRun();
 
