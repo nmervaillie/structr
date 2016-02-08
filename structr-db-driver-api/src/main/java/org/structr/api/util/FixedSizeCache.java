@@ -24,7 +24,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  *
- * @author Christian Morgner
  */
 public class FixedSizeCache<K, V> {
 
@@ -54,6 +53,7 @@ public class FixedSizeCache<K, V> {
 				}
 			}
 
+			keyQueue.remove(key);
 			keyQueue.add(key);
 		}
 	}
