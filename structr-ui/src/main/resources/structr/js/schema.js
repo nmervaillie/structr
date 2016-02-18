@@ -753,27 +753,19 @@ var _Schema = {
 		var contentDiv = $('#' + id + '_content');
 
 		_Entities.appendPropTab(entity, mainTabs, contentDiv, 'local', 'Local Attributes', targetView === 'local', function (c) {
-			Command.get(entity.id, function(e) {
-				_Schema.appendLocalProperties(c, e);
-			});
+			_Schema.appendLocalProperties(c, entity);
 		});
 
 		_Entities.appendPropTab(entity, mainTabs, contentDiv, 'views', 'Views', targetView === 'views', function (c) {
-			Command.get(entity.id, function(e) {
-				_Schema.appendViews(c, 'schema_nodes', e);
-			});
+			_Schema.appendViews(c, 'schema_nodes', entity);
 		});
 
 		_Entities.appendPropTab(entity, mainTabs, contentDiv, 'methods', 'Methods', targetView === 'methods', function (c) {
-			Command.get(entity.id, function(e) {
-				_Schema.appendMethods(c, e);
-			});
+			_Schema.appendMethods(c, entity);
 		});
 
 		_Entities.appendPropTab(entity, mainTabs, contentDiv, 'remote', 'Remote Attributes', targetView === 'remote', function (c) {
-			Command.get(entity.id, function(e) {
-				_Schema.appendRemoteProperties(c, e);
-			});
+			_Schema.appendRemoteProperties(c, entity);
 		});
 
 		var n = $('.schema-details', contentDiv);
@@ -1135,13 +1127,8 @@ var _Schema = {
 
 				$.each(data.result, function(i, res) {
 
-					var source = nodes[res.sourceId];
-					var target = nodes[res.targetId];
-
-					_Schema.getPropertyName(source.name, res.relationshipType, target.name, true, function(key) {
-						_Schema.appendRelatedProperty($('.related-attrs', el), res, res.targetJsonName ? res.targetJsonName : key, true);
-						instance.repaintEverything();
-					});
+					_Schema.appendRelatedProperty($('.related-attrs', el), res, res.targetJsonName ? res.targetJsonName : res.oldTargetJsonName, true);
+					instance.repaintEverything();
 
 				});
 
@@ -1157,13 +1144,8 @@ var _Schema = {
 
 				$.each(data.result, function(i, res) {
 
-					var source = nodes[res.sourceId];
-					var target = nodes[res.targetId];
-
-					_Schema.getPropertyName(target.name, res.relationshipType, source.name, false, function(key) {
-						_Schema.appendRelatedProperty($('.related-attrs', el), res, res.sourceJsonName ? res.sourceJsonName : key, false);
-						instance.repaintEverything();
-					});
+					_Schema.appendRelatedProperty($('.related-attrs', el), res, res.sourceJsonName ? res.sourceJsonName : res.oldSourceJsonName, false);
+					instance.repaintEverything();
 
 				});
 
@@ -2469,7 +2451,7 @@ var _Schema = {
 						});
 						$('#add-' + i).on('click', function() {
 
-							Command.snapshots("add", snapshot, null, function(data) {  console.log(data)
+							Command.snapshots("add", snapshot, null, function(data) {
 
 								var status = data.status;
 
