@@ -1029,6 +1029,24 @@ var _Entities = {
 		}
 		return editIcon;
 	},
+	appendCollapseChildrenIcon: function(parent, entity, visible) {
+
+		var collapseChildrenIcon = $('.collapse_children_icon', parent);
+
+		if (!(collapseChildrenIcon && collapseChildrenIcon.length)) {
+			parent.append('<img title="Collapse Children" alt="Collapse Children" class="collapse_children_icon button" src="' + '/structr/icon/text_indent_remove.png' + '">');
+			collapseChildrenIcon = $('.collapse_children_icon', parent);
+		}
+		collapseChildrenIcon.on('click', function(e) {
+		});
+		if (visible) {
+			collapseChildrenIcon.css({
+				visibility: 'visible',
+				display: 'inline-block'
+			});
+		}
+		return collapseChildrenIcon;
+	},
 	appendDataIcon: function(parent, entity) {
 
 		var dataIcon = $('.data_icon', parent);
@@ -1225,10 +1243,10 @@ var _Entities = {
 			return;
 		} else {
 			_Logger.log(_LogType.ENTITIES, 'ensureExpanded: fetch children', el);
-			
+
 			Command.children(id, callback);
 			var displayName = getElementDisplayName(Structr.entity(id));
-			
+
 			el.children('.expand_icon').first().prop('src', 'icon/tree_arrow_down.png')
 				.prop('alt', 'Collapse ' + displayName)
 				.prop('title', 'Collapse ' + displayName);

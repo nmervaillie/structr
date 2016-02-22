@@ -176,6 +176,60 @@ var _Elements = {
 		}
 	],
 	voidAttrs: ['br', 'hr', 'img', 'input', 'link', 'meta', 'area', 'base', 'col', 'embed', 'keygen', 'menuitem', 'param', 'track', 'wbr'],
+	sortedElementGroups: [
+		{
+			'name': 'A',
+			'elements': ['a', 'abbr', 'address', 'area', 'aside', 'article', 'audio'],
+		},
+		{
+			'name': 'B',
+			'elements': ['b', 'base', 'bdi', 'bdo', 'blockquote', 'body', 'br', 'button'],
+		},
+		{
+			'name': 'C',
+			'elements': ['canvas', 'caption', 'cite', 'code', 'colgroup', 'col', 'command', 'comment'],
+		},
+		{
+			'name': 'D',
+			'elements': ['datalist', 'dd', 'del', 'details', 'div', 'dfn', 'dl', 'dt'],
+		},
+		{
+			'name': 'E-F',
+			'elements': ['em', 'embed', '|', 'fieldset', 'figcaption', 'figure', 'form', 'footer'],
+		},
+		{
+			'name': 'G-H',
+			'elements': ['g', '|', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'header', 'hgroup', 'hr'],
+		},
+		{
+			'name': 'I-K',
+			'elements': ['i', 'iframe', 'img', 'input', 'ins', '|', 'kbd', 'keygen'],
+		},
+		{
+			'name': 'L-M',
+			'elements': ['label', 'legend', 'li', 'link', '|', 'map', 'mark', 'menu', 'meta', 'meter'],
+		},
+		{
+			'name': 'N-O',
+			'elements': ['nav', 'noscript', '|', 'object', 'ol', 'optgroup', 'option', 'output'],
+		},
+		{
+			'name': 'P-R',
+			'elements': ['p', 'param', 'pre', 'progress', '|', 'rp', 'rt', 'ruby'],
+		},
+		{
+			'name': 'S',
+			'elements': ['s', 'samp', 'script', 'section', 'select', 'small', 'source', 'span', 'strong', 'style', 'sub', 'summary', 'sup'],
+		},
+		{
+			'name': 'T',
+			'elements': ['table', 'tbody', 'td', 'textarea', 'th', 'thead', 'tfoot', 'time', 'title', 'tr', 'track'],
+		},
+		{
+			'name': 'U-W',
+			'elements': ['u', 'ul', '|', 'var', 'video', '|', 'wbr'],
+		}
+	],
 	/**
 	 * Reload widgets
 	 */
@@ -456,6 +510,8 @@ var _Elements = {
 			});
 		}
 
+		_Elements.appendContextMenu(div, entity);
+
 		_Entities.appendExpandIcon(div, entity, hasChildren);
 
 		// Prevent type icon from being draggable
@@ -499,6 +555,7 @@ var _Elements = {
 		_Entities.setMouseOver(div, undefined, ((entity.syncedNodes&&entity.syncedNodes.length)?entity.syncedNodes:[entity.sharedComponent]));
 
 		if (!hasChildren) {
+
 			if (entity.sharedComponent) {
 				Command.get(entity.sharedComponent, function(obj) {
 					_Entities.appendEditSourceIcon(div, obj);
@@ -507,6 +564,7 @@ var _Elements = {
 				_Entities.appendEditSourceIcon(div, entity);
 			}
 		}
+
 		_Entities.appendEditPropertiesIcon(div, entity);
 		//_Entities.appendDataIcon(div, entity);
 
@@ -808,6 +866,180 @@ var _Elements = {
 				});
 			});
 
+		});
+	},
+	appendContextMenu: function(div, entity) {
+
+		$('#menu-area').on("contextmenu",function(e){
+			e.stopPropagation();
+			e.preventDefault();
+		});
+
+		$(div).on("contextmenu",function(e){
+			e.stopPropagation();
+			e.preventDefault();
+		});
+
+		$(div).on('mouseup', function(e) {
+
+			if (e.button !== 2 || $(e.target).hasClass('content')) {
+				return;
+			}
+
+			e.stopPropagation();
+
+			$('#add-child-dialog').remove();
+			$('#menu-area').append('<div id="add-child-dialog"></div>');
+
+			var leftOrRight = 'left';
+			var topOrBottom = 'top';
+			var x = (e.pageX - 8);
+			var y = (div.offset().top - 58);
+
+			if (e.pageX > ($(window).width() / 2)) {
+				leftOrRight = 'right';
+			}
+
+			if (e.pageY > ($(window).height() / 2)) {
+				topOrBottom = 'bottom';
+				y -= 36;
+			}
+
+			var cssPositionClasses = leftOrRight + ' ' + topOrBottom;
+
+			$('#add-child-dialog').css('left', x + 'px');
+			$('#add-child-dialog').css('top', y + 'px');
+
+			// FIXME: its either this or accept that the div will not be highlighted any more when the menu appears. This is
+			// due to the fact that the menu has to be outside of the actual div to be visible even with overflow: hidden,
+			// which is needed to hide the vertical scroll bar in the pages tree view and others.
+			window.setTimeout(function() { $(div).addClass('nodeHover') }, 10);
+
+			var menu = [
+				{ name: 'Insert HTML element', elements: _Elements.sortedElementGroups },
+				{ name: 'Insert Structr element', elements: [
+						'content', 'template'
+				]},
+				{ name: 'Expand / Collapse',   elements: [
+						{ name: 'Expand subtree', func: function() {
+
+							$(div).find('.node').each(function(i, el) {
+								if (!_Entities.isExpanded(el)) {
+									_Entities.toggleElement(el);
+								}
+							});
+							if (!_Entities.isExpanded(div)) {
+								_Entities.toggleElement(div);
+							}
+						}},
+						{ name: 'Collapse subtree', func: function() {
+
+							$(div).find('.node').each(function(i, el) {
+								if (_Entities.isExpanded(el)) {
+									_Entities.toggleElement(el);
+								}
+							});
+							if (_Entities.isExpanded(div)) {
+								_Entities.toggleElement(div);
+							}
+						}}
+					], separator: true
+				},
+				/*
+				{ name: 'Movement', elements: [
+
+						{ name: 'Move to top',    func: function() {} },
+						{ name: 'Move to bottom', func: function() {} }
+					]
+				},
+				{ name: 'Other actions', elements: [
+						{ name: 'Remove element', func: function() {} },
+						{ name: 'Delete element', func: function() {} }
+					]
+				}
+				*/
+			];
+
+			// information about most used elements in this page from backend
+			if (entity.mostUsedTags && entity.mostUsedTags.length) {
+				menu.push({
+					name: 'Most used elements', elements: entity.mostUsedTags
+				});
+			}
+
+			menu.forEach(function(item, i) {
+
+				$('#add-child-dialog').append(
+					'<ul class="' + cssPositionClasses + '" id="element-menu-' + i + '"><li id="element-group-switch-' + i + '">' + item.name +
+					'<i class="fa fa-caret-right pull-right"></i>' +
+					'<ul class="element-group hidden ' + cssPositionClasses + '" id="element-group-' + i + '"></ul></li></ul>'
+				);
+
+				if (item.separator) {
+					$('#element-menu-' + i ).append('<hr />');
+				}
+
+				item.elements.forEach(function(subitem, j) {
+
+					if (subitem.elements && subitem.elements.length) {
+
+						$('#element-group-' + i).append(
+							'<li id="element-subgroup-switch-' + i + '-' + j + '">' + subitem.name +
+							'<i class="fa fa-caret-right pull-right"></i>' +
+							'<ul class="element-subgroup hidden ' + cssPositionClasses + '" id="element-subgroup-' + i + '-' + j + '"></ul></li>'
+						);
+
+						subitem.elements.forEach(function(tag, k) {
+
+							if (tag === '|') {
+								$('#element-subgroup-' + i + '-' + j).append('<hr />');
+							} else {
+
+								$('#element-subgroup-' + i + '-' + j).append('<li id="add-' + tag + '-' + i + '-' + j + '-' + k + '">' + tag + '</li>');
+								$('#add-' + tag + '-' + i + '-' + j + '-' + k).on('mousedown', function(e) {
+
+									e.stopPropagation();
+									if (tag === 'content') {
+										Command.createAndAppendDOMNode(entity.pageId, entity.id, null, {});
+									} else {
+										Command.createAndAppendDOMNode(entity.pageId, entity.id, tag, {});
+									}
+									$('#add-child-dialog').remove();
+									$(div).removeClass('nodeHover');
+								});
+							}
+						});
+
+					} else {
+
+						$('#element-group-' + i ).append('<li id="add-' + i + '-' + j + '">' + (subitem.name ? subitem.name : subitem) + '</li>');
+						$('#add-' + i + '-' + j).on('mousedown', function(e) {
+							e.stopPropagation();
+							if (subitem.func && (typeof subitem.func === 'function')) {
+								subitem.func();
+							} else {
+								if (subitem === 'content') {
+									Command.createAndAppendDOMNode(entity.pageId, entity.id, null, {});
+								} else {
+									Command.createAndAppendDOMNode(entity.pageId, entity.id, subitem, {});
+								}
+							}
+							$('#add-child-dialog').remove();
+							$(div).removeClass('nodeHover');
+						});
+					}
+
+					$('#element-subgroup-switch-' + i + '-' + j).hover(function() {
+						$('.element-subgroup').addClass('hidden');
+						$('#element-subgroup-' + i + '-' + j).removeClass('hidden');
+					}, function() {});
+				});
+
+				$('#element-group-switch-' + i).hover(function() {
+					$('.element-group').addClass('hidden');
+					$('#element-group-' + i).removeClass('hidden');
+				}, function() {});
+			});
 		});
 	}
 };
