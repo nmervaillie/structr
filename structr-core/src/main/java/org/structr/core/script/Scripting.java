@@ -40,10 +40,6 @@ import org.structr.schema.parser.DatePropertyParser;
  */
 public class Scripting {
 
-	static {
-		ContextFactory.initGlobal(new ContextFactory());
-	}
-
 	public static String replaceVariables(final ActionContext actionContext, final GraphObject entity, final Object rawValue) throws FrameworkException {
 
 		if (rawValue == null) {
@@ -149,13 +145,13 @@ public class Scripting {
 
 		final String entityName        = entity != null ? entity.getProperty(AbstractNode.name) : null;
 		final String entityDescription = entity != null ? ( StringUtils.isNotBlank(entityName) ? "\"" + entityName + "\":" : "" ) + entity.getUuid() : "anonymous";
-		final Context scriptingContext = Context.enter();
+		final Context scriptingContext = new ContextFactory().enterContext();
 
 		try {
 
 			// Set version to JavaScript1.2 so that we get object-literal style
 			// printing instead of "[object Object]"
-			scriptingContext.setLanguageVersion(Context.VERSION_1_8);
+			scriptingContext.setLanguageVersion(Context.VERSION_1_2);
 
 			// Initialize the standard objects (Object, Function, etc.)
 			// This must be done before scripts can be executed.
