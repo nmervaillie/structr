@@ -498,7 +498,7 @@ var Command = {
 	 * to the new one.
 	 *
 	 */
-	appendWidget: function(source, parentId, pageId, widgetHostBaseUrl, attributes, callback) {
+	appendWidget: function(source, parentId, pageId, widgetHostBaseUrl, attributes) {
 		var obj = {};
 		obj.command = 'APPEND_WIDGET';
 		obj.pageId = pageId;
@@ -513,7 +513,7 @@ var Command = {
 		}
 		obj.data = data;
 		_Logger.log(_LogType.WS[obj.command], 'appendWidget()', obj);
-		return sendObj(obj, callback);
+		return sendObj(obj);
 	},
 	/**
 	 * Send a SAVE_NODE command to the server.
@@ -555,25 +555,6 @@ var Command = {
 		var obj = {};
 		obj.command = 'GET_LOCAL_STORAGE';
 		_Logger.log(_LogType.WS[obj.command], 'getLocalStorage()', obj);
-		return sendObj(obj, callback);
-	},
-	/**
-	 * Send a REPLACE_WIDGET command to the server.
-	 *
-	 * The server will create nodes from the given source and
-	 * replace the original node with the nodes created.
-	 *
-	 */
-	replaceWidget: function(source, id, parentId, pageId, callback) {
-		var obj = {};
-		obj.command = 'REPLACE_WIDGET';
-		obj.id = id;
-		obj.pageId = pageId;
-		var data = {};
-		data.source = source;
-		data.parentId = parentId;
-		obj.data = data;
-		_Logger.log(_LogType.WS[obj.command], 'replaceWidget()', obj);
 		return sendObj(obj, callback);
 	},
 	/**
@@ -1128,7 +1109,7 @@ var Command = {
 	 *
 	 * No broadcast.
 	 */
-	deleteUnattachedNodes: function(callback) {
+	deleteUnattachedNodes: function() {
 		var obj = {};
 		obj.command = 'DELETE_UNATTACHED_NODES';
 		_Logger.log(_LogType.WS[obj.command], 'deleteUnattachedNodes()', obj);
