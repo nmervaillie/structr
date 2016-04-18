@@ -26,7 +26,6 @@ import org.structr.core.entity.SchemaProperty;
 import org.structr.schema.SchemaHelper.Type;
 import org.structr.schema.json.JsonFunctionProperty;
 import org.structr.schema.json.JsonSchema;
-import org.structr.schema.json.JsonScriptProperty;
 
 /**
  *
@@ -116,10 +115,6 @@ public class StructrFunctionProperty extends StructrStringProperty implements Js
 
 				throw new IllegalStateException("Invalid readFunction for property " + name + ", expected string.");
 			}
-
-		} else {
-
-			throw new IllegalStateException("Missing readFunction value for property " + name);
 		}
 
 		final Object writeFunctionValue = source.get(JsonSchema.KEY_WRITE_FUNCTION);

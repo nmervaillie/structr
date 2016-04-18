@@ -561,7 +561,7 @@ var _Filesystem = {
 		var size = d.isFolder ? folders.length + files.length : (d.size ? d.size : '-');
 
 		var rowId = 'row' + d.id;
-		tableBody.append('<tr id="' + rowId + '"></tr>');
+		tableBody.append('<tr id="' + rowId + '"' + (d.isThumbnail ? ' class="thumbnail"' : '') + '></tr>');
 		var row = $('#' + rowId);
 		var icon = d.isFolder ? 'fa-folder' : _Filesystem.getIcon(d);
 
@@ -576,7 +576,7 @@ var _Filesystem = {
 		}
 
 		row.append('<td>' + size + '</td>');
-		row.append('<td>' + d.type + (d.isFile && d.contentType ? ' (' + d.contentType + ')' : '') + '</td>');
+		row.append('<td>' + d.type + (d.isThumbnail ? ' thumbnail' : '') + (d.isFile && d.contentType ? ' (' + d.contentType + ')' : '') + '</td>');
 		row.append('<td>' + (d.owner ? (d.owner.name ? d.owner.name : '[unnamed]') : '') + '</td>');
 
 		// Change working dir by click on folder icon
@@ -585,12 +585,12 @@ var _Filesystem = {
 			e.preventDefault();
 			e.stopPropagation();
 
-			if (d.parent && d.parent.id) {
+			if (d.parentId) {
 
-				fileTree.jstree('open_node', $('#' + d.parent.id), function() {
+				fileTree.jstree('open_node', $('#' + d.parentId), function() {
 
 					if (d.name === '..') {
-						$('#' + d.parent.id + '_anchor').click();
+						$('#' + d.parentId + '_anchor').click();
 					} else {
 						$('#' + d.id + '_anchor').click();
 					}
