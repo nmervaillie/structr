@@ -90,6 +90,6 @@ https://hosting.structr.com/
 
 ## Copyright and License
 
-Copyright 2010-2015 Structr GmbH
+Copyright 2010-2016 Structr GmbH
 
 Structr is licensed under the GPLv3 and AGPLv3 (Structr UI).
